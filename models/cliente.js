@@ -19,6 +19,10 @@ const Cliente = sequelize.define('clientes', {
       unique: true,
       allowNull: false,
     },
+    telefono_cliente :{
+      type : DataTypes.STRING,
+      allowNull : true
+    },
     deuda_actual: {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0.00,
@@ -29,7 +33,13 @@ const Cliente = sequelize.define('clientes', {
     puntuacion: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
-    }},{
+    },
+    isactive : {
+      type : DataTypes.INTEGER,
+      defaultValue : 0
+    }
+    
+  },{
       timestamps : false
     }
   );

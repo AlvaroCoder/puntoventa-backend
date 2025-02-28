@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const clientesController = require('../controllers/clientesController');
+const { clientMiddleware } = require('../middlewares/clientMiddleware');
 
 // Ruta para obtener todos los clientes
-router.get('/', clientesController.getAllClientes);
+router.get('/', clientMiddleware, clientesController.getAllClientes);
 // Ruta para crear un cliente
-router.post('/', clientesController.createCliente);
+router.post('/', clientMiddleware, clientesController.createCliente);
 // Ruta de eliminar un cliente
-router.delete('/',clientesController.deleteCliente);
+router.delete('/', clientMiddleware,clientesController.deleteCliente);
 // Ruta de actualizar un cliente
-router.put('/',clientesController.updateCliente);
+router.put('/', clientMiddleware,clientesController.updateCliente);
 
 module.exports = router;
