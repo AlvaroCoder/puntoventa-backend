@@ -3,6 +3,7 @@ const router = express.Router();
 const clientesController = require('../controllers/clientesController');
 const { clientMiddleware } = require('../middlewares/clientMiddleware');
 
+router.get('/data-dni',clientesController.getDataSunatCliente);
 // Ruta para obtener todos los clientes
 router.get('/', clientMiddleware, clientesController.getAllClientes);
 // Ruta para crear un cliente
