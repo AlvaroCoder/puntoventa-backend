@@ -5,7 +5,8 @@ const Creditos = sequelize.define('Creditos',{
     id_credito:{
         type : DataTypes.INTEGER,
         unique : true,
-        autoIncrement : true
+        autoIncrement : true,
+        primaryKey : true
     },
     monto_total : {
         type : DataTypes.DECIMAL(10,2),

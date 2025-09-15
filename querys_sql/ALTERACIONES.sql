@@ -1,0 +1,1 @@
+ALTER TABLE trabajadores ADD COLUMN contrasenna_hash VARCHAR(100);
