@@ -1,7 +1,6 @@
 const { Op } = require('sequelize');
 const Cliente = require('../models/cliente');
 
-// Obtener todos los clientes
 exports.getAllClientes = async (req, res) => {
   try {
     const clientes = await Cliente.findAll();
@@ -37,7 +36,6 @@ exports.getDataSunatCliente=async(req, res)=>{
   }
 }
 
-// Crear un cliente
 exports.createCliente = async (req, res) => {
   const { 
     nombre_cliente, 
@@ -64,7 +62,7 @@ exports.createCliente = async (req, res) => {
       return res.status(400).json({ message: 'Ya existe un cliente con el mismo DNI, nombre o apellido.' });
     };
 
-    const nuevoCliente = await Cliente.create({ 
+    await Cliente.create({ 
       nombre_cliente, 
       apellido_cliente, 
       dni_cliente, 
@@ -80,7 +78,7 @@ exports.createCliente = async (req, res) => {
     res.status(500).json({ message: 'Error al crear el cliente', error: err });
   }
 };
-// Eliminar un cliente
+
 exports.deleteCliente = async (req,res)=>{
   const {id_cliente} = req.query;
   try {
@@ -99,7 +97,6 @@ exports.deleteCliente = async (req,res)=>{
     res.status(500).json({ message: 'Error al eliminar el cliente', error: err });
   }
 }
-// Actualizar un cliente
 exports.updateCliente = async(req,res)=>{
   const {id_cliente} =  req.query;
   try {
