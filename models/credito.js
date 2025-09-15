@@ -7,8 +7,26 @@ const Creditos = sequelize.define('Creditos',{
         unique : true,
         autoIncrement : true
     },
-    id_cliente : {
-        
-    }
+    monto_total : {
+        type : DataTypes.DECIMAL(10,2),
+        allowNull : false
+    },
+    monto_pagado : {
+        type : DataTypes.DECIMAL(10,2),
+        defaultValue : 0
+    },
+    fecha_vencimiento: {
+        type: DataTypes.DATE,
+    },
+    estado: {
+      type: DataTypes.ENUM("pendiente", "pagado", "vencido"),
+      defaultValue: "pendiente",
+    },
+},
+{
+    tableName: 'creditos',
+    timestamps: true,
+    createdAt: "fecha_inicio",
+    updatedAt: false,
 })
 module.exports = Creditos;

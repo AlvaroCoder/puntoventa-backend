@@ -13,4 +13,6 @@ router.delete('/', clientMiddleware,clientesController.deleteCliente);
 // Ruta de actualizar un cliente
 router.put('/', clientMiddleware,clientesController.updateCliente);
 
+router.get("/credit", clientMiddleware, clientesController.getCreditCliente)
+
 module.exports = router;

@@ -17,8 +17,9 @@ app.use(morgan(':method :url :status :response-time ms - :res[content-length]'))
 
 // Rutas
 app.use('/api/clientes', clientesRoutes);
-app.use('/register/users', usersRoutes);
 
+
+app.use('/register/users', usersRoutes);
 
 // Sincronizar la base de datos y arrancar el servidor
 sequelize.sync().then(() => {

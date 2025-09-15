@@ -74,7 +74,6 @@ exports.createCliente = async (req, res) => {
       fecha_ultimo_pago, 
       puntuacion 
     });
-    console.log(nuevoCliente);
     
     res.status(201).json({message : "Se creo con exito el nuevo cliente"});
   } catch (err) {
@@ -105,8 +104,32 @@ exports.updateCliente = async(req,res)=>{
   const {id_cliente} =  req.query;
   try {
     const cliente = await Cliente.update({
-      
-    })
+      nombre_cliente: req.body.nombre_cliente,
+      apellido_cliente: req.body.apellido_cliente,
+      dni_cliente: req.body.dni_cliente,
+      deuda_actual: req.body.deuda_actual,
+      telefono_cliente: req.body.telefono_cliente,
+      fecha_ultimo_pago: req.body.fecha_ultimo_pago,
+      puntuacion: req.body.puntuacion,
+      isactive: req.body.isactive
+    }, {
+      where: {
+        id_cliente: id_cliente
+      }
+    });
+    if (cliente[0] === 1) {
+      res.status(200).json({ message: 'Cliente actualizado exitosamente' });
+    } else {
+      res.status(404).json({ message: 'Cliente no encontrado o no se realizaron cambios' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: 'Error al actualizar el cliente', error: err });
+  }
+}
+exports.getCreditCliente=async(req,res)=>{
+  try {
+    const {idCliente} = req?.query;
+    
   } catch (err) {
     
   }
