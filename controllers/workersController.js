@@ -30,9 +30,14 @@ exports.iniciarSesion=async(req,res)=>{
     }
 }
 
-exports.getAllWorkers = async(req, res)=>{
+exports.getAllWorkersByIdUsuario = async(req, res)=>{
     try {
-        const trabajadores = await Worker.findAll();
+        const {idUsuario} = req.query;        
+        const trabajadores = await Worker.findAll({
+            where : {
+                id_usuario : idUsuario
+            }
+        });
         res.json(trabajadores);
     } catch (err) {
         res.status(500).json({ message: 'Error al obtener los clientes', error: err });
@@ -98,6 +103,7 @@ exports.createWorker=async(req, res)=>{
     try {
         const {
             id_tienda,
+            id_usuario,
             nombre, 
             apellido,
             dni,
@@ -111,6 +117,7 @@ exports.createWorker=async(req, res)=>{
         const contrasenna_hash = await bcrypt.hash(contrasenna, salt);
         await Worker.create({
             id_tienda,
+            id_usuario,
             nombre,
             apellido,
             dni,
