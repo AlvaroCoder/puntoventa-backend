@@ -6,7 +6,7 @@ router.get('/', workersController.getAllWorkersByIdUsuario);
 
 router.get("/id", workersController.getWorkerDataById);
 
-router.get("/estado", workersController.getWorkerByEstado);3
+router.get("/estado", workersController.getWorkerByEstado);
 
 router.post('/', workersController.createWorker);
 
