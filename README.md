@@ -1,4 +1,4 @@
-# PipoApp - Backend
+# Punto Venta - Backend
 
 Este es el backend de PipoApp, una aplicación para gestionar clientes con crédito en una tienda de ropa. El backend está desarrollado utilizando Node.js, Express, y Sequelize como ORM para interactuar con la base de datos.
 
