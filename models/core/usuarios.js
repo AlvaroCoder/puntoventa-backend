@@ -1,57 +1,82 @@
-module.exports = (sequelize, DataTypes) => {
-    const Usuario = sequelize.define('Usuario', {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-      email: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-        unique: true,
-        validate: {
-          isEmail: true
+const sequelize = require('../../config/db');
+const {DataTypes} = require("sequelize");
+
+const Usuarios = sequelize.define("usuarios",{
+    id : {
+        type : DataTypes.INTEGER,
+        allowNull : false,
+        autoIncrement : true,
+        primaryKey : true
+    },
+    email : {
+        type : DataTypes.STRING(255),
+        allowNull : false,
+        unique : true,
+        validate : {
+            isEmail : {
+                msg : "Ingrese un email valido"
+            },
+            len : {
+                args : [0,255],
+                msg : "El email no puede ser mayor de 255 caracteres"
+            }
         }
-      },
-      password_hash: {
-        type: DataTypes.STRING(255),
-        allowNull: false
-      },
-      nombre_completo: {
-        type: DataTypes.STRING(255),
-        allowNull: false
-      },
-      ruc_dni: {
-        type: DataTypes.STRING(20),
-        allowNull: false,
-        unique: true
-      },
-      telefono: {
-        type: DataTypes.STRING(20)
-      },
-      activo: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
-      },
-      ultimo_login: {
-        type: DataTypes.DATE
-      }
-    }, {
-      tableName: 'usuarios',
-      timestamps: true,
-      paranoid: true
-    });
-  
-    Usuario.associate = function(models) {
-      Usuario.hasMany(models.Empresa, {
-        foreignKey: 'usuario_id',
-        as: 'empresas'
-      });
-      Usuario.hasOne(models.Trabajador, {
-        foreignKey: 'usuario_id',
-        as: 'trabajador'
-      });
-    };
-  
-    return Usuario;
-  };
+    },
+    password_hash : {
+        type : DataTypes.STRING(255),
+        allowNull : false,
+    },
+    nombre_completo : {
+        type : DataTypes.STRING(255),
+        allowNull : false,
+        unique : true,
+        validate : {
+            len: {
+                args : [0,255],
+                msg : "El nombre no puede ser de más de 255 caracteres"
+            },
+            notEmpty: {
+                msg: "El nombre no puede estar vacío"
+            }
+        }
+    },
+    ruc_dni : {
+        type : DataTypes.STRING(20),
+        unique : true,
+        allowNull : false,
+        validate : {
+            len : {
+                args : [11,11],
+                msg : "El ruc debe de ser de 11 caracteres"
+            }
+        }
+    },
+    telefono : {
+        type : DataTypes.STRING(20),
+        allowNull : true,
+        validate : {
+            is: {
+                args: /^[0-9+\-\s()]*$/i,
+                msg: "Formato de teléfono no válido"
+            }
+        }
+    },
+    fecha_registro : {
+        type : DataTypes.DATE,
+        defaultValue : DataTypes.NOW
+    },
+    activo : {
+        type : DataTypes.BOOLEAN,
+        defaultValue : true,
+    },
+    ultimo_login : {
+        allowNull : true,
+        type : DataTypes.DATE,
+        defaultValue : null
+    }
+},{
+    tableName : 'usuarios',
+    timestamps : false
+});
+
+module.exports =Usuarios;

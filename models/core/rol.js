@@ -1,35 +1,36 @@
-module.exports = (sequelize, DataTypes) => {
-    const Rol = sequelize.define('Rol', {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+const sequelize = require('../../config/db');
+const {DataTypes} = require("sequelize");
+
+const Roles = sequelize.define('roles',{
+  id : {
+    type : DataTypes.INTEGER,
+    allowNull : false,
+    primaryKey : true
+  },
+  nombre : {
+    type : DataTypes.STRING(50),
+    allowNull : false,
+    validate : {
+      notEmpty : {
+        msg : "El nombre del rol es requerido"
       },
-      nombre: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-        unique: true
-      },
-      descripcion: {
-        type: DataTypes.TEXT
-      },
-      nivel_permiso: {
-        type: DataTypes.INTEGER,
-        defaultValue: 1
+      len : {
+        args : [0,50],
+        msg : "El nombre debe tener menos de 50 caracteres"
       }
-    }, {
-      tableName: 'roles',
-      timestamps: true
-    });
-  
-    Rol.associate = function(models) {
-      Rol.belongsToMany(models.Trabajador, {
-        through: 'trabajador_roles',
-        foreignKey: 'rol_id',
-        otherKey: 'trabajador_id',
-        as: 'trabajadores'
-      });
-    };
-  
-    return Rol;
-  };
+    }
+  },
+  descripcion : {
+    type : DataTypes.TEXT,
+    allowNull : true
+  },
+  nivel_permiso : {
+    type : DataTypes.INTEGER,
+    defaultValue : 1
+  }
+},{
+  tableName: 'roles',
+  timestamps : true,
+});
+
+module.exports = Roles;

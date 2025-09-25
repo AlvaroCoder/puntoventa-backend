@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const Cliente = require('../models/cliente');
+const Cliente = require('../models/ventas');
 
 exports.getAllClientes = async (req, res) => {
   try {

@@ -1,57 +1,31 @@
 const { Sequelize } = require('sequelize');
 const config = require('../config/db');
 
-const sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  {
-    host: config.host,
-    dialect: config.dialect,
-    port: config.port,
-    logging: config.logging,
-    pool: {
-      max: 10,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
-    define: {
-      timestamps: true,
-      underscored: true,
-      paranoid: true 
-    }
-  }
-);
 
 // Importar modelos
 const models = {
-  Usuario: require('./core/usuario')(sequelize, Sequelize),
-  Empresa: require('./core/empresa')(sequelize, Sequelize),
-  Tienda: require('./core/tienda')(sequelize, Sequelize),
-  Trabajador: require('./core/trabajador')(sequelize, Sequelize),
-  Rol: require('./core/rol')(sequelize, Sequelize),
-  RegistroAsistencia: require('./core/registroAsistencia')(sequelize, Sequelize),
+  Usuario: require('./core/usuarios'),
+  Empresa: require('./core/empresa'),
+  Tienda: require('./core/tienda'),
+  Trabajador: require('./core/trabajador'),
+  Rol: require('./core/rol'),
+  RegistroAsistencia: require('./core/registroAsistencia'),
   
-  // Inventario
-  CategoriaProducto: require('./inventario/categoriaProducto')(sequelize, Sequelize),
-  Producto: require('./inventario/producto')(sequelize, Sequelize),
-  InventarioTienda: require('./inventario/inventarioTienda')(sequelize, Sequelize),
-  MovimientoInventario: require('./inventario/movimientoInventario')(sequelize, Sequelize),
-  Proveedor: require('./inventario/proveedor')(sequelize, Sequelize),
+  CategoriaProducto: require('./inventario/categoriaProducto'),
+  Producto: require('./inventario/producto'),
+  InventarioTienda: require('./inventario/inventarioTienda'),
+  MovimientoInventario: require('./inventario/movimientoinventario'),
+  Proveedor: require('./inventario/proveedor'),
   
-  // Ventas
-  Cliente: require('./ventas/cliente')(sequelize, Sequelize),
-  Venta: require('./ventas/venta')(sequelize, Sequelize),
+  Cliente: require('./ventas/cliente'),
+  Venta: require('./ventas/venta'),
   VentaDetalle: require('./ventas/ventaDetalle')(sequelize, Sequelize),
   CreditoCliente: require('./ventas/creditoCliente')(sequelize, Sequelize),
   PagoCredito: require('./ventas/pagoCredito')(sequelize, Sequelize),
   
-  // Caja
   CajaTienda: require('./caja/cajaTienda')(sequelize, Sequelize),
   CajaMovimiento: require('./caja/cajaMovimiento')(sequelize, Sequelize),
   
-  // Estandar
   RubroNegocio: require('./estandar/rubroNegocio')(sequelize, Sequelize),
   MarcaEstandar: require('./estandar/marcaEstandar')(sequelize, Sequelize),
   CategoriaEstandar: require('./estandar/categoriaEstandar')(sequelize, Sequelize),

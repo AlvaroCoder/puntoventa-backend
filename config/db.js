@@ -1,37 +1,27 @@
-require('dotenv').config();
+// Utilizamos un ORM para un mejor manejo de la base de datos
 
-module.exports = {
-  development: {
-    username: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '',
-    database: process.env.DB_NAME || 'puntoventa360',
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
-    dialect: 'mysql',
-    logging: console.log
-  },
-  test: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME_TEST,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: 'mysql',
-    logging: false
-  },
-  production: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: 'mysql',
-    logging: false,
-    pool: {
-      max: 10,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
+const {Sequelize} = require("sequelize")
+require("dotenv").config();
+
+const sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+      host : process.env.DB_HOST,
+      dialect : 'mysql',
+      pool :{
+        max: 10,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+      },
+      define : {
+        timestamps : true,
+        underscored : true,
+        paranoid: true
+      }
     }
-  }
-};
+)
+
+module.exports = sequelize;
