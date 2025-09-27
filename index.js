@@ -13,7 +13,6 @@ const sequelize = require('./config/db');
 dotenv.config();
 const app = express();
 
-// Middleware
 app.use(bodyParser.json());
 app.use(cors());
 app.use(morgan(':method :url :status :response-time ms - :res[content-length]'))
