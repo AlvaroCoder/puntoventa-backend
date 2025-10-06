@@ -2,6 +2,20 @@ const { Op } = require('sequelize');
 const UsuarioModelo = require('../../models/core/usuarios');
 const ResponseHandler = require('../../lib/responseHanlder');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const generarToken = (usuario) => {
+    return jwt.sign(
+        {
+            id: usuario.id,
+            email: usuario.email,
+            nombre: usuario.nombre_completo
+        },
+        process.env.JWT_SECRET || 'secreto_por_defecto_cambiar_en_produccion',
+        { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+};
+
 exports.getAllUsuarios=async(req, res)=>{
     try {
         const { activo, email, nombre } = req.query;
@@ -58,9 +72,10 @@ exports.getUsuarioActual=async(req, res)=>{
         if (!usuario) {
             return ResponseHandler.sendNotFound(res, "Usuario no encontrado");
         }
-        ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
+        
+        ResponseHandler.sendSuccess(res, "Usuario actual", usuario);
 
-    } catch (err) {
+    } catch (err) {        
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };
@@ -265,6 +280,7 @@ exports.verificarEmail=async(req, res)=>{
     try {
         const { email } = req.params;
         const { exclude_id } = req.query;
+        console.log(email);
         
         let whereClause = { email: email.toLowerCase() };
         
@@ -273,6 +289,10 @@ exports.verificarEmail=async(req, res)=>{
         }
         
         const usuarioExistente = await UsuarioModelo.findOne({ where: whereClause });
+
+        if (!usuarioExistente) {
+            return ResponseHandler.sendNotFound(res, "No existe el usuario");
+        }
 
         ResponseHandler.sendSuccess(res, "Verificación de email completada", {
             disponible: !usuarioExistente,
@@ -295,13 +315,132 @@ exports.verificarDocumento=async(req,res)=>{
           whereClause.id = { [Op.ne]: exclude_id };
         }
         
-        const usuarioExistente = await Usuario.findOne({ where: whereClause });
+        const usuarioExistente = await UsuarioModelo.findOne({ where: whereClause });
+        
+        if (!usuarioExistente) {
+            return ResponseHandler.sendNotFound(res, "No existe ese usuario");
+        }
         
         ResponseHandler.sendSuccess(res, "Verificación de documento completada", {
-          disponible: !usuarioExistente,
+          disponible: Boolean(usuarioExistente),
           documento: documento
         });
+    } catch (err) {        
+        ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
+    }
+}
+
+
+
+exports.login=async(req,res)=>{
+    try {
+        const {email, password} = req.body;
+
+        if (!email || !password) {
+            return ResponseHandler.sendValidationError(res, "Email y contraseña son requeridos");
+        }
+
+        const usuario = await UsuarioModelo.findOne({
+            where : {email : email.toLowerCase()}
+        });
+
+        if (!usuario) {
+            return ResponseHandler.sendUnAuthorized(res, "Credenciales inválidas");
+        }
+
+        if (!usuario.activo) {
+            return ResponseHandler.sendForbidden(res, "El usuario no esta activo")
+        }
+
+        const contrasennaValida = await bcrypt.compare(password, usuario.password_hash);
+
+        if (!contrasennaValida) {
+            return ResponseHandler.sendUnAuthorized(res, "Contraseña inválida");
+        }
+
+        await usuario.update({ ultimo_login: new Date() });
+
+        const token = generarToken(usuario);
+
+        const usuarioResponse = {
+            id: usuario.id,
+            email: usuario.email,
+            nombre_completo: usuario.nombre_completo,
+            ruc_dni: usuario.ruc_dni,
+            telefono: usuario.telefono,
+            fecha_registro: usuario.fecha_registro,
+            activo: usuario.activo,
+            ultimo_login: usuario.ultimo_login
+        };
+
+        ResponseHandler.sendSuccess(res, "Inicio de sesión exitoso", {
+            usuario: usuarioResponse,
+            token: token,
+            expira_en: process.env.JWT_EXPIRES_IN || '24h'
+        });
+
     } catch (err) {
+        ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
+    }
+};
+
+exports.registro=async(req, res)=>{
+    try {
+        const { email, password, nombre_completo, ruc_dni, telefono } = req.body;
+
+        if (!email || !password || !nombre_completo || !ruc_dni) {
+            return ResponseHandler.sendValidationError(res, "Email, contraseña, nombre completo y RUC/DNI son requeridos");
+        }
+
+        const usuarioExistente = await UsuarioModelo.findOne({
+            where : {email : email.toLowerCase()}
+        });
+
+        if (usuarioExistente) {
+            return ResponseHandler.sendForbidden(res, "Usuario ya existente");
+        }
+
+        const documentoExistente = await UsuarioModelo.findOne({
+            where: { ruc_dni: ruc_dni }
+        });
+
+        if (documentoExistente) {
+            return ResponseHandler.sendForbidden(res, "El RUC/DNI ya está registrado");
+        }
+
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        const usuario = await UsuarioModelo.create({
+            email: email.toLowerCase(),
+            password_hash: passwordHash,
+            nombre_completo: nombre_completo.trim().toUpperCase(),
+            ruc_dni: ruc_dni,
+            telefono: telefono,
+            activo: true,
+            fecha_registro: new Date()
+        });
+
+        const token = generarToken(usuario);
+
+        const usuarioResponse = {
+            id: usuario.id,
+            email: usuario.email,
+            nombre_completo: usuario.nombre_completo,
+            ruc_dni: usuario.ruc_dni,
+            telefono: usuario.telefono,
+            fecha_registro: usuario.fecha_registro,
+            activo: usuario.activo,
+            ultimo_login: usuario.ultimo_login
+        };
+
+        ResponseHandler.sendCreated(res, "Usuario registrado exitosamente", {
+            usuario: usuarioResponse,
+            token: token,
+            expira_en: process.env.JWT_EXPIRES_IN || '24h'
+        });
+
+    } catch (err) {        
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 }

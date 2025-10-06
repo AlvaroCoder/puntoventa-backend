@@ -3,6 +3,8 @@ const ResponseHandler = require("../lib/responseHanlder");
 const adminMiddleware = (req, res, next) => {
     try {
         if (!req.user || !req.user.esAdmin) {
+            console.log(req.user);
+            
             return ResponseHandler.sendForbidden(res, 'Se requieren permisos de administrador');
         }
         next();

@@ -3,6 +3,7 @@ const ResponseHandler = require('../lib/responseHanlder');
 
 const authMiddleware = (req, res, next) => {
     try {
+        // Si no envia el JWT con authorization entonces no permite el acceso a la ruta.
         const token = req.header('Authorization')?.replace('Bearer ', '');
         
         if (!token) {

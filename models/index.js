@@ -1,5 +1,4 @@
 const models = {
-
   Usuario: require('./core/usuarios'),
   Empresa: require('./core/empresa'),
   Tienda: require('./core/tienda'),

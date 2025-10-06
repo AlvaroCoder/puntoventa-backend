@@ -46,8 +46,33 @@ const Usuarios = sequelize.define("usuarios",{
         allowNull : false,
         validate : {
             len : {
-                args : [11,11],
-                msg : "El ruc debe de ser de 11 caracteres"
+                args : [8,11],
+                msg : "El documento debe tener entre 8 y 11 caracteres"
+            },
+            esDocumentoValido(value){
+                if (!value) return;
+                
+                if (!/^\d+$/.test(value)) {
+                    throw new Error('El documento solo puede contener números');
+                }
+
+                if (value.length === 8) {
+                    const dni = parseInt(value);
+                    if (dni < 10000000 || dni > 99999999) {
+                        throw new Error('DNI no válido');
+                    }
+                }
+
+                if (value.length === 11) {
+                    const ruc = value;
+                    
+                    const primerosDigitos = ruc.substring(0, 2);
+                    const digitosValidos = ['10', '15', '17', '20'];
+                    if (!digitosValidos.includes(primerosDigitos)) {
+                        throw new Error('RUC no válido - Los primeros dígitos deben ser 10, 15, 17 o 20');
+                    }
+                    
+                }
             }
         }
     },
