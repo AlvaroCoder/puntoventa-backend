@@ -109,12 +109,11 @@ exports.toggleEstadoCategoria=async(req, res)=>{
     }
 }
 
-exports.getCategoriasByEmpresa=async(req, res)=>{
+exports.getCategoriasByIdEmpresa=async(req, res)=>{
     try {
-        const { empresaId } = req.params;
         const { activa } = req.query;
 
-        let whereClause = { empresa_id : empresaId };
+        let whereClause = { empresa_id : req.params.id };
 
         if (activa !== undefined) {
             whereClause.activa = activa === 'true';

@@ -7,6 +7,9 @@ router.use('/tienda', require('./core/tiendaRoutes'));
 router.use('/trabajador', require('./core/trabajadoresRoute'));
 router.use('/rol', require('./core/rolRoute'));
 router.use('/producto', require('./inventario/productRoutes'));
-
+router.use('/movimiento', require('./inventario/movimientoInvRoutes'));
+router.use('/categoria', require('./inventario/categoriaProductosRoutes'));
+router.use('/inventario', require('./inventario/inventarioTiendaRoutes'));
+router.use("/proveedor", require('./inventario/proveedorRoutes'));
 
 module.exports = router;

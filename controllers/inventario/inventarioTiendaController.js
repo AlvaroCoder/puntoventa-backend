@@ -114,10 +114,9 @@ exports.actualizarStock = async (req, res) => {
 
 exports.getIventarioByIdTienda=async(req, res)=>{
     try {
-        const { tiendaId } = req.params;
         const { bajo_stock } = req.query;
         
-        let whereClause = { tienda_id: tiendaId };
+        let whereClause = { tienda_id: req.params.id };
 
         if (bajo_stock === 'true') {
             whereClause.stock_disponible = { [Op.lte] : InventarioTienda.raw("stock_minimo")}
@@ -137,12 +136,10 @@ exports.getIventarioByIdTienda=async(req, res)=>{
     }
 }
 
-exports.getInventariosByProducto = async (req, res) => {
-    try {
-        const { productoId } = req.params;
-        
+exports.getInventariosByIdProducto = async (req, res) => {
+    try {        
         const inventarios = await InventarioTienda.findAll({
-            where: { producto_id: productoId },
+            where: { producto_id: req.params.id },
             order: [['tienda_id', 'ASC']]
         });
         
