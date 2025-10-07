@@ -98,7 +98,9 @@ const Empresa = sequelize.define("empresas",{
       }
     },
     logo_url : {
-      type : DataTypes.STRING(500)
+      allowNull : true,
+      type : DataTypes.STRING(500),
+      defaultValue : ""
     },
     moneda_base : {
       type : DataTypes.STRING(10)

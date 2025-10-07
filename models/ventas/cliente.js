@@ -42,7 +42,8 @@ const Cliente = sequelize.define("cliente",{
             isEmail : {
                 msg : "Ingrese un email valido"
             }
-        }
+        },
+        unique : true
     },
     telefono : {
         type : DataTypes.STRING(20),

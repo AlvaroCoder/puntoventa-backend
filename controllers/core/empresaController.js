@@ -25,7 +25,7 @@ exports.getEmpresaById=async(req, res)=>{
 exports.createEmpresa=async(req,res)=>{
     try {
         const empresa = await EmpresaModelo.create(req.body);
-        ResponseHandler.created("Empresa creada correctamente", empresa);
+        ResponseHandler.sendSuccess(res, "Empresa creada correctamente", empresa);
     } catch (err) {
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err))
     }
@@ -38,7 +38,7 @@ exports.updateEmpresa=async(req, res)=>{
             ResponseHandler.sendNotFound(res, "No existe esa empresa");
         }
         await empresa.update(req.body);
-        ResponseHandler.accepted("Se actualizo correctamente");
+        ResponseHandler.sendSuccess(res, "Empresa actualizada correctamente", empresa)
     } catch (err) {
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
