@@ -5,7 +5,8 @@ const Proveedor = sequelize.define("proveedores",{
     id : {
         type : DataTypes.INTEGER,
         autoIncrement : true,
-        allowNull : false
+        allowNull : false,
+        primaryKey : true
     },
     empresa_id :{ 
         type : DataTypes.INTEGER,

@@ -237,7 +237,7 @@ exports.actualizarPrecio=async(req, res)=>{
     }
 };
 
-exports.verificarProducto=async(req, res)=>{
+exports.verificarCodigoProducto=async(req, res)=>{
     try {
         
         const { codigo } = req.params;
