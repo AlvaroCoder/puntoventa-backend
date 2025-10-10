@@ -108,12 +108,10 @@ exports.createCliente = async (req, res) => {
     try {
         const { empresa_id, numero_documento, email } = req.body;
 
-        // CORRECCIÓN: Validar campos requeridos
         if (!empresa_id || !numero_documento || !req.body.nombre_completo) {
             return ResponseHandler.sendValidationError(res, "empresa_id, numero_documento y nombre_completo son requeridos");
         }
 
-        // CORRECCIÓN: Verificar duplicados por documento único
         const clienteExistente = await Cliente.findOne({
             where: {
                 empresa_id: empresa_id,
@@ -122,10 +120,9 @@ exports.createCliente = async (req, res) => {
         });
 
         if (clienteExistente) {
-            return ResponseHandler.sendConflict(res, "Ya existe un cliente con este número de documento en la empresa");
+            return ResponseHandler.sendValidationError(res, "Ya existe un cliente con este número de documento en la empresa");
         }
 
-        // CORRECCIÓN: Verificar duplicados por email si se proporciona
         if (email) {
             const clienteConEmail = await Cliente.findOne({
                 where: {
@@ -135,7 +132,7 @@ exports.createCliente = async (req, res) => {
             });
 
             if (clienteConEmail) {
-                return ResponseHandler.sendConflict(res, "Ya existe un cliente con este email en la empresa");
+                return ResponseHandler.sendValidationError(res, "Ya existe un cliente con este email en la empresa");
             }
         }
 
@@ -155,7 +152,6 @@ exports.updateCliente = async (req, res) => {
             return ResponseHandler.sendNotFound(res, "Cliente no encontrado");
         }
 
-        // CORRECCIÓN: Validar duplicados al actualizar
         if (req.body.numero_documento && req.body.numero_documento !== cliente.numero_documento) {
             const clienteConDocumento = await Cliente.findOne({
                 where: {
@@ -166,7 +162,7 @@ exports.updateCliente = async (req, res) => {
             });
 
             if (clienteConDocumento) {
-                return ResponseHandler.sendConflict(res, "Ya existe otro cliente con este número de documento en la empresa");
+                return ResponseHandler.sendValidationError(res, "Ya existe otro cliente con este número de documento en la empresa");
             }
         }
 
@@ -180,7 +176,7 @@ exports.updateCliente = async (req, res) => {
             });
 
             if (clienteConEmail) {
-                return ResponseHandler.sendConflict(res, "Ya existe otro cliente con este email en la empresa");
+                return ResponseHandler.sendValidationError(res, "Ya existe otro cliente con este email en la empresa");
             }
         }
 
