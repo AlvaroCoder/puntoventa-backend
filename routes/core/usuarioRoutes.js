@@ -6,6 +6,10 @@ const adminMiddleware = require('../../middlewares/adminMiddleware');
 
 router.post("/login", usuarioController.login);
 router.post("/register", usuarioController.registro);
+router.post("/google", usuarioController.loginGoogle);
+router.post("/recuperar-password", usuarioController.recuperarPassword);
+router.post("/verificar-codigo", usuarioController.verificarCodigoReset);
+router.post("/reset-password", usuarioController.resetPassword);
 
 router.get('/verificar-email/:email', usuarioController.verificarEmail);
 router.get('/verificar-documento/:documento', usuarioController.verificarDocumento);

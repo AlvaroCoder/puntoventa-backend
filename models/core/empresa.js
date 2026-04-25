@@ -47,12 +47,6 @@ const Empresa = sequelize.define("empresas",{
     },
     nombre_comercial : {
       type : DataTypes.STRING(255),
-      allowNull : false,
-      validate : {
-        notEmpty : {
-          msg : "Completa el nombre de la empresa"
-        }
-      }
     },
     ruc : {
       type : DataTypes.STRING(20),

@@ -24,12 +24,11 @@ const Usuarios = sequelize.define("usuarios",{
     },
     password_hash : {
         type : DataTypes.STRING(255),
-        allowNull : false,
+        allowNull : true,
     },
     nombre_completo : {
         type : DataTypes.STRING(255),
         allowNull : false,
-        unique : true,
         validate : {
             len: {
                 args : [0,255],
@@ -43,7 +42,7 @@ const Usuarios = sequelize.define("usuarios",{
     ruc_dni : {
         type : DataTypes.STRING(20),
         unique : true,
-        allowNull : false,
+        allowNull : true,
         validate : {
             len : {
                 args : [8,11],
@@ -98,6 +97,23 @@ const Usuarios = sequelize.define("usuarios",{
         allowNull : true,
         type : DataTypes.DATE,
         defaultValue : null
+    },
+    google_id : {
+        type : DataTypes.STRING(255),
+        allowNull : true,
+        unique : true
+    },
+    reset_code : {
+        type : DataTypes.STRING(10),
+        allowNull : true
+    },
+    reset_code_expiry : {
+        type : DataTypes.DATE,
+        allowNull : true
+    },
+    proveedor_auth : {
+        type : DataTypes.ENUM('local','google'),
+        defaultValue : 'local'
     }
 },{
     tableName : 'usuarios',

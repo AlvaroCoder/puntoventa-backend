@@ -38,4 +38,11 @@ const models = {
 };
 
 
+// Asociaciones — requeridas para que los `include` funcionen en controllers
+models.Trabajador.belongsTo(models.Rol, { foreignKey: 'rol_id', as: 'rol' });
+models.Rol.hasMany(models.Trabajador, { foreignKey: 'rol_id', as: 'trabajadores' });
+
+models.SuscripcionEmpresa.belongsTo(models.PlanSuscripcion, { foreignKey: 'plan_id', as: 'plan' });
+models.PlanSuscripcion.hasMany(models.SuscripcionEmpresa, { foreignKey: 'plan_id', as: 'suscripciones' });
+
 module.exports = models;

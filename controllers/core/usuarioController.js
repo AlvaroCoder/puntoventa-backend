@@ -1,18 +1,57 @@
 const { Op } = require('sequelize');
 const UsuarioModelo = require('../../models/core/usuarios');
+const EmpresaModelo = require('../../models/core/empresa');
+const TrabajadorModelo = require('../../models/core/trabajador');
+const RolModelo = require('../../models/core/rol');
 const ResponseHandler = require('../../lib/responseHanlder');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
+const nodemailer = require('nodemailer');
 
-const generarToken = (usuario) => {
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const crearTransportador = () => nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT),
+    secure: false,
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
+
+const JWT_SECRET = process.env.JWT_SECRET || 'secreto_por_defecto_cambiar_en_produccion';
+const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || '24h';
+
+// Token para el dueño de una empresa (esAdmin: true)
+const generarTokenDueno = (usuario, empresaId) => {
+    return jwt.sign(
+        { id: usuario.id, email: usuario.email, nombre_completo: usuario.nombre_completo, esAdmin: true, empresa_id: empresaId },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES }
+    );
+};
+
+// Token para un trabajador (esAdmin: false, con rol y nivel_permiso)
+const generarTokenTrabajador = (usuario, trabajador, rol) => {
     return jwt.sign(
         {
-            id: usuario.id,
-            email: usuario.email,
-            nombre: usuario.nombre_completo
+            id: usuario.id, email: usuario.email, nombre_completo: usuario.nombre_completo,
+            esAdmin: false, empresa_id: trabajador.empresa_id, tienda_id: trabajador.tienda_id,
+            rol_id: trabajador.rol_id, nivel_permiso: rol.nivel_permiso
         },
-        process.env.JWT_SECRET || 'secreto_por_defecto_cambiar_en_produccion',
-        { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES }
+    );
+};
+
+// Token temporal para registro (sin empresa aún)
+const generarTokenRegistro = (usuario) => {
+    return jwt.sign(
+        { id: usuario.id, email: usuario.email, nombre_completo: usuario.nombre_completo, esAdmin: false },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES }
     );
 };
 
@@ -280,7 +319,6 @@ exports.verificarEmail=async(req, res)=>{
     try {
         const { email } = req.params;
         const { exclude_id } = req.query;
-        console.log(email);
         
         let whereClause = { email: email.toLowerCase() };
         
@@ -332,55 +370,238 @@ exports.verificarDocumento=async(req,res)=>{
 
 
 
-exports.login=async(req,res)=>{
+exports.login = async (req, res) => {
     try {
-        const {email, password} = req.body;
+        const { email, password } = req.body;
 
         if (!email || !password) {
             return ResponseHandler.sendValidationError(res, "Email y contraseña son requeridos");
         }
 
-        const usuario = await UsuarioModelo.findOne({
-            where : {email : email.toLowerCase()}
-        });
-
-        if (!usuario) {
-            return ResponseHandler.sendUnAuthorized(res, "Credenciales inválidas");
-        }
-
-        if (!usuario.activo) {
-            return ResponseHandler.sendForbidden(res, "El usuario no esta activo")
-        }
+        const usuario = await UsuarioModelo.findOne({ where: { email: email.toLowerCase() } });
+        if (!usuario) return ResponseHandler.sendUnAuthorized(res, "Credenciales inválidas");
+        if (!usuario.activo) return ResponseHandler.sendForbidden(res, "El usuario no está activo");
 
         const contrasennaValida = await bcrypt.compare(password, usuario.password_hash);
-
-        if (!contrasennaValida) {
-            return ResponseHandler.sendUnAuthorized(res, "Contraseña inválida");
-        }
+        if (!contrasennaValida) return ResponseHandler.sendUnAuthorized(res, "Contraseña inválida");
 
         await usuario.update({ ultimo_login: new Date() });
 
-        const token = generarToken(usuario);
+        // Detectar si es dueño o trabajador
+        let token;
+        let tipoUsuario;
+        let datosExtra = {};
 
-        const usuarioResponse = {
-            id: usuario.id,
-            email: usuario.email,
-            nombre_completo: usuario.nombre_completo,
-            ruc_dni: usuario.ruc_dni,
-            telefono: usuario.telefono,
-            fecha_registro: usuario.fecha_registro,
-            activo: usuario.activo,
-            ultimo_login: usuario.ultimo_login
-        };
+        const empresa = await EmpresaModelo.findOne({ where: { usuario_id: usuario.id } });
+
+        if (empresa) {
+            token = generarTokenDueno(usuario, empresa.id);
+            tipoUsuario = 'dueno';
+            datosExtra = { empresa_id: empresa.id };
+        } else {
+            const trabajador = await TrabajadorModelo.findOne({ where: { usuario_id: usuario.id, activo: true } });
+
+            if (!trabajador) {
+                return ResponseHandler.sendForbidden(res,
+                    "Tu cuenta no está asociada a ninguna empresa. Contacta al administrador."
+                );
+            }
+
+            const rol = await RolModelo.findByPk(trabajador.rol_id);
+            if (!rol) return ResponseHandler.sendForbidden(res, "El rol del trabajador no existe. Contacta al administrador.");
+
+            token = generarTokenTrabajador(usuario, trabajador, rol);
+            tipoUsuario = 'trabajador';
+            datosExtra = {
+                empresa_id: trabajador.empresa_id,
+                tienda_id: trabajador.tienda_id,
+                rol_id: trabajador.rol_id,
+                nivel_permiso: rol.nivel_permiso,
+                rol_nombre: rol.nombre
+            };
+        }
 
         ResponseHandler.sendSuccess(res, "Inicio de sesión exitoso", {
-            usuario: usuarioResponse,
-            token: token,
-            expira_en: process.env.JWT_EXPIRES_IN || '24h'
+            usuario: {
+                id: usuario.id, email: usuario.email,
+                nombre_completo: usuario.nombre_completo,
+                tipo: tipoUsuario,
+                ...datosExtra
+            },
+            token,
+            expira_en: JWT_EXPIRES
         });
 
     } catch (err) {
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
+    }
+};
+
+exports.loginGoogle=async(req, res)=>{
+    try {
+        const { credential } = req.body;
+
+        if (!credential) {
+            return ResponseHandler.sendValidationError(res, "Token de Google requerido");
+        }
+
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const payload = ticket.getPayload();
+        const { email, name, sub: googleId } = payload;
+
+        let usuario = await UsuarioModelo.findOne({ where: { email: email.toLowerCase() } });
+        let isNewUser = false;
+
+        if (!usuario) {
+            usuario = await UsuarioModelo.create({
+                email: email.toLowerCase(),
+                nombre_completo: name ? name.trim().toUpperCase() : email,
+                google_id: googleId,
+                proveedor_auth: 'google',
+                activo: true,
+                fecha_registro: new Date()
+            });
+            isNewUser = true;
+        } else if (!usuario.google_id) {
+            await usuario.update({ google_id: googleId, proveedor_auth: 'google' });
+        }
+
+        if (!usuario.activo) {
+            return ResponseHandler.sendForbidden(res, "El usuario no está activo");
+        }
+
+        await usuario.update({ ultimo_login: new Date() });
+
+        const empresaGoogle = await EmpresaModelo.findOne({ where: { usuario_id: usuario.id } });
+        const token = empresaGoogle
+            ? generarTokenDueno(usuario, empresaGoogle.id)
+            : generarTokenRegistro(usuario);
+
+        ResponseHandler.sendSuccess(res, "Inicio de sesión con Google exitoso", {
+            usuario: {
+                id: usuario.id,
+                email: usuario.email,
+                nombre_completo: usuario.nombre_completo
+            },
+            token,
+            isNewUser
+        });
+    } catch (err) {
+        ResponseHandler.sendInternalError(res, "Error al verificar token de Google", err.message);
+    }
+};
+
+exports.recuperarPassword=async(req, res)=>{
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return ResponseHandler.sendValidationError(res, "Email requerido");
+        }
+
+        const usuario = await UsuarioModelo.findOne({ where: { email: email.toLowerCase() } });
+
+        if (!usuario) {
+            return ResponseHandler.sendSuccess(res, "Si el correo existe, recibirás un código");
+        }
+
+        const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiry = new Date(Date.now() + 15 * 60 * 1000);
+
+        await usuario.update({ reset_code: codigo, reset_code_expiry: expiry });
+
+        const transporter = crearTransportador();
+        await transporter.sendMail({
+            from: process.env.SMTP_FROM,
+            to: usuario.email,
+            subject: 'Código de recuperación — PipoApp 360',
+            html: `
+                <div style="font-family:sans-serif;max-width:480px;margin:auto">
+                    <h2 style="color:#1F4363">Recupera tu contraseña</h2>
+                    <p>Tu código de verificación es:</p>
+                    <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#FF821E;padding:16px 0">${codigo}</div>
+                    <p style="color:#666;font-size:13px">Este código expira en 15 minutos.</p>
+                </div>
+            `
+        });
+
+        ResponseHandler.sendSuccess(res, "Si el correo existe, recibirás un código");
+    } catch (err) {
+        ResponseHandler.sendInternalError(res, "Error al enviar código", err.message);
+    }
+};
+
+exports.verificarCodigoReset=async(req, res)=>{
+    try {
+        const { email, codigo } = req.body;
+
+        if (!email || !codigo) {
+            return ResponseHandler.sendValidationError(res, "Email y código son requeridos");
+        }
+
+        const usuario = await UsuarioModelo.findOne({ where: { email: email.toLowerCase() } });
+
+        if (!usuario || !usuario.reset_code || usuario.reset_code !== codigo) {
+            return ResponseHandler.sendUnAuthorized(res, "Código inválido");
+        }
+
+        if (new Date() > new Date(usuario.reset_code_expiry)) {
+            return ResponseHandler.sendUnAuthorized(res, "El código ha expirado");
+        }
+
+        const reset_token = jwt.sign(
+            { email: usuario.email, tipo: 'reset' },
+            process.env.JWT_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        ResponseHandler.sendSuccess(res, "Código verificado", { reset_token });
+    } catch (err) {
+        ResponseHandler.sendInternalError(res, "Error al verificar código", err.message);
+    }
+};
+
+exports.resetPassword=async(req, res)=>{
+    try {
+        const { reset_token, nueva_password } = req.body;
+
+        if (!reset_token || !nueva_password) {
+            return ResponseHandler.sendValidationError(res, "Token y nueva contraseña son requeridos");
+        }
+
+        let payload;
+        try {
+            payload = jwt.verify(reset_token, process.env.JWT_SECRET);
+        } catch {
+            return ResponseHandler.sendUnAuthorized(res, "Token de reset inválido o expirado");
+        }
+
+        if (payload.tipo !== 'reset') {
+            return ResponseHandler.sendUnAuthorized(res, "Token inválido");
+        }
+
+        const usuario = await UsuarioModelo.findOne({ where: { email: payload.email } });
+
+        if (!usuario) {
+            return ResponseHandler.sendNotFound(res, "Usuario no encontrado");
+        }
+
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(nueva_password, saltRounds);
+
+        await usuario.update({
+            password_hash: passwordHash,
+            reset_code: null,
+            reset_code_expiry: null
+        });
+
+        ResponseHandler.sendSuccess(res, "Contraseña actualizada exitosamente");
+    } catch (err) {
+        ResponseHandler.sendInternalError(res, "Error al resetear contraseña", err.message);
     }
 };
 
@@ -421,7 +642,7 @@ exports.registro=async(req, res)=>{
             fecha_registro: new Date()
         });
 
-        const token = generarToken(usuario);
+        const token = generarTokenRegistro(usuario);
 
         const usuarioResponse = {
             id: usuario.id,
@@ -434,11 +655,11 @@ exports.registro=async(req, res)=>{
             ultimo_login: usuario.ultimo_login
         };
 
-        ResponseHandler.sendCreated(res, "Usuario registrado exitosamente", {
+        ResponseHandler.sendSuccess(res, "Usuario registrado exitosamente", {
             usuario: usuarioResponse,
             token: token,
             expira_en: process.env.JWT_EXPIRES_IN || '24h'
-        });
+        }, 201);
 
     } catch (err) {        
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
