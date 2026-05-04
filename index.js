@@ -18,7 +18,7 @@ app.use('/api',require('./routes'));
 // Sincronizar la base de datos y arrancar el servidor
 sequelize.authenticate()
   .then(() => sequelize.query("SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION'"))
-  .then(() => sequelize.sync({ alter: true }))
+  .then(() => sequelize.sync())
   .then(() => seedRoles())
   .then(() => {
     app.listen(3030, () => {

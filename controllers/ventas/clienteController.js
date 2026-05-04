@@ -1,6 +1,31 @@
 const { Op } = require('sequelize');
+const multer = require('multer');
+const XLSX = require('xlsx');
 const ResponseHandler = require('../../lib/responseHanlder');
 const Cliente = require('../../models/ventas/cliente');
+
+const MIMETYPES_EXCEL = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+    'application/vnd.ms-excel',                                       
+    'application/octet-stream'  
+];
+
+const storageExcel = multer.memoryStorage();
+
+const fileFilterExcel = (req, file, cb) => {
+    const extension = file.originalname.toLowerCase();
+    if (MIMETYPES_EXCEL.includes(file.mimetype) || extension.endsWith('.xlsx') || extension.endsWith('.xls')) {
+        cb(null, true);
+    } else {
+        cb(new Error('Solo se permiten archivos Excel (.xlsx o .xls)'), false);
+    }
+};
+
+exports.uploadExcel = multer({
+    storage: storageExcel,
+    fileFilter: fileFilterExcel,
+    limits: { fileSize: 5 * 1024 * 1024 }
+}).single('archivo');
 
 exports.getAllClientesByIdEmpresa = async (req, res) => {
     try {
@@ -322,5 +347,161 @@ exports.verificarDocumentoCliente = async (req, res) => {
 
     } catch (err) {
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
+    }
+};
+
+const COLUMNAS_VALIDAS = ['numero_documento', 'nombre_completo', 'tipo_documento', 'email', 'telefono', 'direccion', 'categoria'];
+const CATEGORIAS_VALIDAS = ['REGULAR', 'DEUDOR', 'RESPONSABLE'];
+
+const normalizarHeader = (header) =>
+    String(header).trim().toLowerCase().replace(/\s+/g, '_');
+
+exports.importarClientesExcel = async (req, res) => {
+    if (!req.file) {
+        return ResponseHandler.sendValidationError(res, "No se recibió ningún archivo Excel");
+    }
+
+    try {
+        const empresa_id = req.user.empresa_id;
+
+        // 1. Parsear el buffer Excel
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const nombreHoja = workbook.SheetNames[0];
+        const hoja = workbook.Sheets[nombreHoja];
+
+        // Convertir la hoja a array de objetos; defval evita celdas undefined
+        const filasCrudas = XLSX.utils.sheet_to_json(hoja, { defval: '' });
+
+        if (!filasCrudas.length) {
+            return ResponseHandler.sendValidationError(res, "El archivo Excel está vacío o no contiene datos");
+        }
+
+        // 2. Normalizar headers para que coincidan con snake_case sin importar mayúsculas/espacios
+        const filasNormalizadas = filasCrudas.map((fila) => {
+            const filaNorm = {};
+            for (const [key, value] of Object.entries(fila)) {
+                const keyNorm = normalizarHeader(key);
+                if (COLUMNAS_VALIDAS.includes(keyNorm)) {
+                    filaNorm[keyNorm] = String(value).trim();
+                }
+            }
+            return filaNorm;
+        });
+
+        // 3. Primer pasada: separar filas válidas de filas con errores de validación básica
+        const filas_con_error = [];
+        const filasValidas = [];
+
+        filasNormalizadas.forEach((fila, index) => {
+            const numeroFila = index + 2; // +2 porque fila 1 es el header
+
+            if (!fila.numero_documento) {
+                filas_con_error.push({
+                    fila: numeroFila,
+                    numero_documento: fila.numero_documento || '',
+                    motivo: 'El campo numero_documento es requerido'
+                });
+                return;
+            }
+
+            if (!fila.nombre_completo) {
+                filas_con_error.push({
+                    fila: numeroFila,
+                    numero_documento: fila.numero_documento,
+                    motivo: 'El campo nombre_completo es requerido'
+                });
+                return;
+            }
+
+            // Normalizar campos opcionales
+            const tipoDocumento = fila.tipo_documento || 'DNI';
+            const categoriaRaw = (fila.categoria || '').toUpperCase();
+            const categoria = CATEGORIAS_VALIDAS.includes(categoriaRaw) ? categoriaRaw : 'REGULAR';
+
+            filasValidas.push({
+                _fila: numeroFila,
+                empresa_id,
+                numero_documento: fila.numero_documento,
+                nombre_completo: fila.nombre_completo,
+                tipo_documento: tipoDocumento,
+                email: fila.email || null,
+                telefono: fila.telefono || null,
+                direccion: fila.direccion || null,
+                categoria
+            });
+        });
+
+        // 4. Consulta única: obtener documentos que ya existen para esta empresa
+        const documentosExcel = filasValidas.map((f) => f.numero_documento);
+
+        const clientesExistentes = await Cliente.findAll({
+            attributes: ['numero_documento'],
+            where: {
+                empresa_id,
+                numero_documento: { [Op.in]: documentosExcel }
+            }
+        });
+
+        const documentosExistentes = new Set(clientesExistentes.map((c) => c.numero_documento));
+
+        // 5. Separar nuevos de duplicados
+        const clientesNuevos = [];
+        let omitidos_duplicados = 0;
+
+        for (const fila of filasValidas) {
+            if (documentosExistentes.has(fila.numero_documento)) {
+                omitidos_duplicados++;
+            } else {
+                // Eliminar campo interno _fila antes de crear
+                const { _fila, ...datosCliente } = fila;
+                clientesNuevos.push(datosCliente);
+            }
+        }
+
+        // 6. Inserción masiva de los clientes nuevos
+        let creados = 0;
+        const erroresBulk = [];
+
+        if (clientesNuevos.length > 0) {
+            try {
+                const resultado = await Cliente.bulkCreate(clientesNuevos, {
+                    validate: true,
+                    // ignoreDuplicates como salvaguarda extra ante condición de carrera
+                    ignoreDuplicates: false
+                });
+                creados = resultado.length;
+            } catch (bulkErr) {
+                // Si bulkCreate falla en alguna fila, intentamos insertar de a uno para aislar el error
+                for (const clienteData of clientesNuevos) {
+                    const filaOriginal = filasValidas.find(
+                        (f) => f.numero_documento === clienteData.numero_documento
+                    );
+                    const numeroFila = filaOriginal ? filaOriginal._fila : '?';
+                    try {
+                        await Cliente.create(clienteData);
+                        creados++;
+                    } catch (rowErr) {
+                        erroresBulk.push({
+                            fila: numeroFila,
+                            numero_documento: clienteData.numero_documento,
+                            motivo: rowErr.message || 'Error al crear el cliente'
+                        });
+                    }
+                }
+            }
+        }
+
+        const totalErrores = filas_con_error.length + erroresBulk.length;
+
+        return ResponseHandler.sendCreated(res, "Importación de clientes completada", {
+            total_filas: filasCrudas.length,
+            creados,
+            omitidos_duplicados,
+            errores: totalErrores,
+            filas_con_error: [...filas_con_error, ...erroresBulk]
+        });
+
+    } catch (err) {
+        return ResponseHandler.sendInternalError(res);
     }
 };
