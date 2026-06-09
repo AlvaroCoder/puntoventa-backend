@@ -16,6 +16,15 @@ const PagoCredito = sequelize.define("pagos_creditos", {
             key: 'id'
         }
     },
+    caja_sesion_id: { 
+        type : DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'caja_sesiones',
+            key: 'id'
+        }
+    },
+
     monto_pago: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
@@ -66,6 +75,11 @@ const PagoCredito = sequelize.define("pagos_creditos", {
             model: 'trabajadores',
             key: 'id'
         }
+    },
+    observaciones: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: ''
     }
 }, {
     tableName: 'pagos_creditos',

@@ -113,7 +113,10 @@ const Tienda = sequelize.define("tienda", {
                 tienda.telefono = tienda.telefono.replace(/\s/g, '');
             }
         }
-    }
+    },
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at'
 });
 
 module.exports = Tienda;

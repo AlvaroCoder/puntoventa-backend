@@ -1,3 +1,16 @@
+/**
+ * Tablas que faltan
+ * 1) Trabjador_roles
+ * 2) Rol_permisos
+ * 3) Modulos_sistema
+ * 4) Nubefact_log
+ * 5) COnfig_puntos
+ * 6) Puntos_movimientos
+ * 7) Ordenes_compra
+ * 8) Ordenes_compra_detalle
+ * 9) Caja_sesiones
+ * 10) Entradas mercancia
+ */
 const models = {
   Usuario: require('./core/usuarios'),
   Empresa: require('./core/empresa'),
@@ -20,7 +33,7 @@ const models = {
   
   CajaTienda: require('./caja/cajatienda'),
   CajaMovimiento: require('./caja/cajamovimiento'),
-  
+
   RubroNegocio: require('./estandar/rubronegocio'),
   MarcaEstandar: require('./estandar/marcaEstandar'),
   CategoriaEstandar: require('./estandar/categoriaestandar'),
@@ -30,7 +43,6 @@ const models = {
   ImportacionProducto: require('./estandar/importacionproducto'),
   LogImportacion: require('./estandar/logImportacion'),
   
-  // Pagos
   PlanSuscripcion: require('./pagos/planSuscripcion'),
   SuscripcionEmpresa: require('./pagos/suscripcionEmpresa'),
   FacturaPago: require('./pagos/facturaPago'),
@@ -38,7 +50,6 @@ const models = {
 };
 
 
-// Asociaciones — requeridas para que los `include` funcionen en controllers
 models.Trabajador.belongsTo(models.Rol, { foreignKey: 'rol_id', as: 'rol' });
 models.Rol.hasMany(models.Trabajador, { foreignKey: 'rol_id', as: 'trabajadores' });
 

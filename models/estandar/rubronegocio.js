@@ -9,7 +9,7 @@ const RubroNegocio = sequelize.define("rubros_negocios",{
         autoIncrement : true
     },
     nombre : {
-        type : DataTypes.STRING(100),
+        type : DataTypes.STRING(255),
         allowNull : false,
         validate : {
             notEmpty : {
@@ -20,6 +20,10 @@ const RubroNegocio = sequelize.define("rubros_negocios",{
                 msg : "El nombre del rubro no puede ser mayor de 100 caracteres"
             }
         }
+    },
+    descripcion: {
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     icono : {
         type : DataTypes.STRING(100),

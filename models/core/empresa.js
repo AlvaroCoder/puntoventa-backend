@@ -46,7 +46,8 @@ const Empresa = sequelize.define("empresas",{
       }
     },
     nombre_comercial : {
-      type : DataTypes.STRING(255),
+      type: DataTypes.STRING(255),
+      allowNull: true
     },
     ruc : {
       type : DataTypes.STRING(20),

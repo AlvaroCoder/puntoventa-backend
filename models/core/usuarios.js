@@ -1,6 +1,8 @@
 const sequelize = require('../../config/db');
 const {DataTypes} = require("sequelize");
 
+// TODO: VALIDADO
+
 const Usuarios = sequelize.define("usuarios",{
     id : {
         type : DataTypes.INTEGER,

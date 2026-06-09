@@ -146,9 +146,9 @@ exports.createCliente = async (req, res) => {
 
         if (clienteExistente) {
             return ResponseHandler.sendValidationError(res, "Ya existe un cliente con este número de documento en la empresa");
-        }
+        }        
 
-        if (email) {
+        if (email && email?.length > 0) {
             const clienteConEmail = await Cliente.findOne({
                 where: {
                     empresa_id: empresa_id,

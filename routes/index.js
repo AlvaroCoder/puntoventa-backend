@@ -15,5 +15,6 @@ router.use('/ventas', require('./ventas/ventasRoutes'));
 router.use('/creditos', require('./ventas/creditosRoutes'))
 router.use('/cliente', require('./ventas/clienteRoutes'));
 router.use('/venta-detalles', require('./ventas/ventaDetallesRoutes'));
-router.use('/rubro', require('./core/rubroRoute'))
+router.use('/rubro', require('./core/rubroRoute'));
+
 module.exports = router;

@@ -39,7 +39,7 @@ const CajaMovimiento = sequelize.define('caja_movimiento',{
         allowNull: false,
         validate: {
             min: {
-                args: [0.01],
+                args: [0],
                 msg: "El monto debe ser mayor a 0"
             }
         }
@@ -87,6 +87,14 @@ const CajaMovimiento = sequelize.define('caja_movimiento',{
                 msg: "Las observaciones no pueden exceder 1000 caracteres"
             }
         }
+    },
+    referencia_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    referencia_tipo: {
+        type: DataTypes.STRING(50),
+        allowNull: true
     }
 }, {
     tableName: 'caja_movimientos',

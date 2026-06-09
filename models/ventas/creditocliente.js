@@ -24,6 +24,14 @@ const CreditoCliente = sequelize.define('credito_cliente',{
             key: 'id'
         }
     },
+    empresa_id: {
+        type : DataTypes.INTEGER,
+        allowNull : false,
+        references : {
+            model : 'empresas',
+            key : 'id'
+        }
+    },
     monto_total: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
@@ -86,6 +94,11 @@ const CreditoCliente = sequelize.define('credito_cliente',{
                 msg: "La tasa de interés no puede ser mayor a 100%"
             }
         }
+    },
+    observaciones: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue : ''
     }
 },{
     tableName: 'creditos_clientes',

@@ -8,7 +8,7 @@ router.use(authMiddleware);
 router.get('/empresa/:id', ClienteController.getAllClientesByIdEmpresa);
 router.get('/buscar/:termino', ClienteController.searchClientes);
 router.get('/categoria/:categoria', ClienteController.getClientesByCategoria);
-router.get('/documento', ClienteController.getClienteByNumeroDocumento);
+router.get('/documento/:numero_documento', ClienteController.getClienteByNumeroDocumento);
 router.get('/validacion', ClienteController.validacionCliente);
 router.get('/verificar-documento', ClienteController.verificarDocumentoCliente);
 

@@ -83,7 +83,18 @@ const VentaDetalle = sequelize.define('venta_detalles',{
                 msg: "El total de línea no puede ser negativo"
             }
         }
-    }
+    },
+    igv: {
+        type : DataTypes.DECIMAL(10, 2),
+        defaultValue : 0,
+        validate: {
+            min: {
+                args: [0],
+                msg: "El IGV no puede ser negativo"
+            }
+        }
+    },
+    
 },{
     tableName: 'venta_detalles',
     timestamps: false,
