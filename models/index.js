@@ -1,54 +1,59 @@
+const NubefactLog = require('./nubefact/nubefactLog');
+
 /**
  * Tablas que faltan
- * 1) Trabjador_roles
- * 2) Rol_permisos
- * 3) Modulos_sistema
- * 4) Nubefact_log
  * 5) COnfig_puntos
  * 6) Puntos_movimientos
  * 7) Ordenes_compra
  * 8) Ordenes_compra_detalle
  * 9) Caja_sesiones
  * 10) Entradas mercancia
+ * 11) Ml_predicciones
+ * 12) IA_conversaciones
  */
 const models = {
-  Usuario: require('./core/usuarios'),
-  Empresa: require('./core/empresa'),
-  Tienda: require('./core/tienda'),
-  Trabajador: require('./core/trabajador'),
-  Rol: require('./core/rol'),
-  RegistroAsistencia: require('./core/registroAsistencia'),
-  
-  CategoriaProducto: require('./inventario/categoriaProducto'),
-  Producto: require('./inventario/producto'),
-  InventarioTienda: require('./inventario/inventarioTienda'),
-  MovimientoInventario: require('./inventario/movimientoinventario'),
-  Proveedor: require('./inventario/proveedor'),
-  
-  Cliente: require('./ventas/cliente'),
-  Venta: require('./ventas/venta'),
-  VentaDetalle: require('./ventas/ventadetalle'),
-  CreditoCliente: require('./ventas/creditocliente'),
-  PagoCredito: require('./ventas/pagoCredito'),
-  
-  CajaTienda: require('./caja/cajatienda'),
-  CajaMovimiento: require('./caja/cajamovimiento'),
+  Usuario: require('./core/usuarios'), // Check
+  Empresa: require('./core/empresa'),  // Check
+  Tienda: require('./core/tienda'),  // Check
+  Trabajador: require('./core/trabajador'), // Check
+  Rol: require('./core/rol'), // Check
+  RegistroAsistencia: require('./core/registroAsistencia'), // Check
+  TrabajadorRoles: require('./core/trabajadorRoles'), // Check
+  RolPermisos: require('./core/rolPermisos'), // Check
+  ModulosSistema: require('./core/modulosSistema'), // Check
 
-  RubroNegocio: require('./estandar/rubronegocio'),
-  MarcaEstandar: require('./estandar/marcaEstandar'),
-  CategoriaEstandar: require('./estandar/categoriaestandar'),
-  PresentacionEstandar: require('./estandar/presentacionestandar'),
-  ProductoEstandar: require('./estandar/productoEstandar'),
-  PrecioReferencia: require('./estandar/precioreferencia'),
-  ImportacionProducto: require('./estandar/importacionproducto'),
+  CategoriaProducto: require('./inventario/categoriaProducto'), // Check
+  Producto: require('./inventario/producto'), // Check
+  InventarioTienda: require('./inventario/inventarioTienda'), // Check
+  MovimientoInventario: require('./inventario/movimientoinventario'), 
+  Proveedor: require('./inventario/proveedor'), // Check
+  
+  Cliente: require('./ventas/cliente'), // Check
+  Venta: require('./ventas/venta'), // Check
+  VentaDetalle: require('./ventas/ventadetalle'), // Check
+  CreditoCliente: require('./ventas/creditocliente'), // Check
+  PagoCredito: require('./ventas/pagoCredito'), // Check
+  
+  CajaTienda: require('./caja/cajatienda'), // Check
+  CajaMovimiento: require('./caja/cajamovimiento'), // Check
+
+  RubroNegocio: require('./estandar/rubronegocio'), // Check
+  MarcaEstandar: require('./estandar/marcaEstandar'), // Check
+  CategoriaEstandar: require('./estandar/categoriaestandar'), // Check
+  PresentacionEstandar: require('./estandar/presentacionestandar'), // Check
+  ProductoEstandar: require('./estandar/productoEstandar'), // Check
+  PrecioReferencia: require('./estandar/precioreferencia'), 
+  ImportacionProducto: require('./estandar/importacionproducto'), // Check
   LogImportacion: require('./estandar/logImportacion'),
   
-  PlanSuscripcion: require('./pagos/planSuscripcion'),
-  SuscripcionEmpresa: require('./pagos/suscripcionEmpresa'),
-  FacturaPago: require('./pagos/facturaPago'),
-  TransaccionPago: require('./pagos/transaccionPago')
-};
+  PlanSuscripcion: require('./pagos/planSuscripcion'), // Check
+  SuscripcionEmpresa: require('./pagos/suscripcionEmpresa'), // Check
+  FacturaPago: require('./pagos/facturaPago'), // Check
+  TransaccionPago: require('./pagos/transaccionPago'), // Check
 
+  NubefactLog: require('./nubefact/nubefactLog'),
+  NubefactConfig: require('./nubefact/nubefactConfig')
+};
 
 models.Trabajador.belongsTo(models.Rol, { foreignKey: 'rol_id', as: 'rol' });
 models.Rol.hasMany(models.Trabajador, { foreignKey: 'rol_id', as: 'trabajadores' });

@@ -12,6 +12,10 @@ const InventarioTienda = sequelize.define("inventario_tienda",{
     type : DataTypes.INTEGER,
     allowNull : false
   },
+  variante_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
   tienda_id : {
     type : DataTypes.INTEGER,
     allowNull : false
@@ -51,6 +55,9 @@ const InventarioTienda = sequelize.define("inventario_tienda",{
     },
     {
       fields : ['tienda_id']
+    },
+    {
+      fields : ['variante_id']
     }
   ]
 });

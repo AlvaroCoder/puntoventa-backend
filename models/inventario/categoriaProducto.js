@@ -45,7 +45,11 @@ const CategoriaProducto = sequelize.define("categorias_productos",{
     {
       fields : ['empresa_id']
     }
-  ]
+  ],
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at', 
+  deletedAt : 'deleted_at',
 })
 
 module.exports = CategoriaProducto;

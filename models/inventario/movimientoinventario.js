@@ -119,6 +119,19 @@ const MovimientoInventario = sequelize.define("movimientos_inventario",{
             }
         }
     },
+    costo_unitario: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        validate: {
+            notNull: {
+                msg: "El costo unitario es requerido"
+            },
+            min: {
+                args: [0],
+                msg: "El costo unitario no puede ser negativo"
+            }
+        }
+    },
     fecha_movimiento : {
         type : DataTypes.DATE,
         defaultValue : NOW,

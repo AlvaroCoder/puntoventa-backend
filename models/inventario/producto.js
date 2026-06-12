@@ -68,6 +68,72 @@ const Producto = sequelize.define("Producto",{
       }
     }
   },
+    unidad_medida : {
+    type : DataTypes.STRING(50),
+    defaultValue : "UNIDAD",
+  },
+    
+  impuesto_porcentaje : {
+    type : DataTypes.DECIMAL(5,2),
+    defaultValue : 0,
+    validate :{
+      min : {
+        args : [0],
+        msg : "El impuesto no puede ser negativo"
+      },
+      max : {
+        args : [100],
+        msg : "El impuesto no puede ser mayor de 100"
+      }
+    }
+  },
+  aplica_igv: {
+    type : DataTypes.BOOLEAN,
+    defaultValue : false
+  },
+    activo : {
+    type : DataTypes.BOOLEAN,
+    defaultValue : true
+  },
+    
+
+  codigo_barras: {
+    type: DataTypes.STRING(100),
+    unique: true,
+    defaultValue : ""
+  },
+
+  imagen_url: {
+    type: DataTypes.STRING(500),
+    defaultValue :""
+  },
+  tiene_variantes: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  temporadas: {
+    type : DataTypes.STRING(50),
+    allowNull : true
+  },
+  genero: {
+      type : DataTypes.STRING(50),
+    allowNull: true,
+    validate: {
+      isIn: {
+        args: [['masculino', 'femenino', 'unisex', 'niño', 'niña', 'otro']],
+        msg: "El género debe ser uno de los siguientes: masculino, femenino, unisex, niño, niña, otro"
+
+      },
+    }
+  },
+  tipo_producto: {
+    type: DataTypes.STRING(100),
+    allowNull: true
+  },
+  tags_moda: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
   stock_actual : {
     type : DataTypes.INTEGER,
     defaultValue : 0,
@@ -88,37 +154,7 @@ const Producto = sequelize.define("Producto",{
       }
     }
   },
-  unidad_medida : {
-    type : DataTypes.STRING(50),
-    defaultValue : "UNIDAD",
-  },
-  impuesto_porcentaje : {
-    type : DataTypes.DECIMAL(5,2),
-    defaultValue : 0,
-    validate :{
-      min : {
-        args : [0],
-        msg : "El impuesto no puede ser negativo"
-      },
-      max : {
-        args : [100],
-        msg : "El impuesto no puede ser mayor de 100"
-      }
-    }
-  },
-  activo : {
-    type : DataTypes.BOOLEAN,
-    defaultValue : true
-  },
-  codigo_barras: {
-    type: DataTypes.STRING(100),
-    unique: true,
-    defaultValue : ""
-  },
-  imagen_url: {
-    type: DataTypes.STRING(500),
-    defaultValue :""
-  }
+
 },{
   tableName : "productos",
   timestamps : true,
