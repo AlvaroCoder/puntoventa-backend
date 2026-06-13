@@ -2,8 +2,6 @@ const NubefactLog = require('./nubefact/nubefactLog');
 
 /**
  * Tablas que faltan
- * 10) Entradas mercancia
- * 13) Entradas mercancia detalle
  * 11) Ml_predicciones
  * 12) IA_conversaciones
  */
