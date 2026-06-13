@@ -5,7 +5,6 @@ const roleMiddleware = require('../../middlewares/roleMiddleware');
 
 router.use(authMiddleware);
 
-// Lectura — todos los autenticados
 router.get('/', trabajadoresController.getAllTrabajadores);
 router.get('/buscar/:termino', trabajadoresController.searchTrabajadores);
 router.get('/empresa/:empresaId', trabajadoresController.getTrabajadorByEmpresa);
@@ -14,7 +13,6 @@ router.get('/tienda/:tiendaId', trabajadoresController.getTrabajadoresByIdTienda
 router.get('/verificar-documento/:documento', trabajadoresController.verificarDocumentoTrabajador);
 router.get('/:id', trabajadoresController.getTrabajadorById);
 
-// Escritura — solo Supervisor (nivel 4) o Dueño
 router.post('/', roleMiddleware(4), trabajadoresController.createTrabajador);
 router.put('/:id', roleMiddleware(4), trabajadoresController.updateTrabajador);
 router.patch('/:id/estado', roleMiddleware(4), trabajadoresController.toggleEstadoTrabajador);

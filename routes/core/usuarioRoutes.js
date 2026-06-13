@@ -4,6 +4,7 @@ const usuarioController = require('../../controllers/core/usuarioController');
 const authMiddleware = require('../../middlewares/authMiddleware');
 const adminMiddleware = require('../../middlewares/adminMiddleware');
 
+
 router.post("/login", usuarioController.login);
 router.post("/register", usuarioController.registro);
 router.post("/google", usuarioController.loginGoogle);

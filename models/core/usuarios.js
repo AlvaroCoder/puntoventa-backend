@@ -1,8 +1,6 @@
 const sequelize = require('../../config/db');
 const {DataTypes} = require("sequelize");
 
-// TODO: VALIDADO
-
 const Usuarios = sequelize.define("usuarios",{
     id : {
         type : DataTypes.INTEGER,
@@ -55,13 +53,6 @@ const Usuarios = sequelize.define("usuarios",{
                 
                 if (!/^\d+$/.test(value)) {
                     throw new Error('El documento solo puede contener números');
-                }
-
-                if (value.length === 8) {
-                    const dni = parseInt(value);
-                    if (dni < 10000000 || dni > 99999999) {
-                        throw new Error('DNI no válido');
-                    }
                 }
 
                 if (value.length === 11) {

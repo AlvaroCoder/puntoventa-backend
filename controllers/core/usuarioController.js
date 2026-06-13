@@ -24,7 +24,6 @@ const crearTransportador = () => nodemailer.createTransport({
 const JWT_SECRET = process.env.JWT_SECRET || 'secreto_por_defecto_cambiar_en_produccion';
 const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || '24h';
 
-// Token para el dueño de una empresa (esAdmin: true)
 const generarTokenDueno = (usuario, empresaId) => {
     return jwt.sign(
         { id: usuario.id, email: usuario.email, nombre_completo: usuario.nombre_completo, esAdmin: true, empresa_id: empresaId },
@@ -33,7 +32,6 @@ const generarTokenDueno = (usuario, empresaId) => {
     );
 };
 
-// Token para un trabajador (esAdmin: false, con rol y nivel_permiso)
 const generarTokenTrabajador = (usuario, trabajador, rol) => {
     return jwt.sign(
         {
@@ -46,7 +44,6 @@ const generarTokenTrabajador = (usuario, trabajador, rol) => {
     );
 };
 
-// Token temporal para registro (sin empresa aún)
 const generarTokenRegistro = (usuario) => {
     return jwt.sign(
         { id: usuario.id, email: usuario.email, nombre_completo: usuario.nombre_completo, esAdmin: false },

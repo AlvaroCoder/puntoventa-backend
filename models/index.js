@@ -1,10 +1,4 @@
-const NubefactLog = require('./nubefact/nubefactLog');
 
-/**
- * Tablas que faltan
- * 11) Ml_predicciones
- * 12) IA_conversaciones
- */
 const models = {
   Usuario: require('./core/usuarios'), 
   Empresa: require('./core/empresa'),  
