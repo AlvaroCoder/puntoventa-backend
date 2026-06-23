@@ -36,6 +36,7 @@ const models = {
   PrecioReferencia: require('./estandar/precioreferencia'), 
   ImportacionProducto: require('./estandar/importacionproducto'),
   LogImportacion: require('./estandar/logImportacion'),
+  ProductoVarianteEstandar : require('./estandar/productoVarianteEstadar'),
   
   PlanSuscripcion: require('./pagos/planSuscripcion'),
   SuscripcionEmpresa: require('./pagos/suscripcionEmpresa'),
