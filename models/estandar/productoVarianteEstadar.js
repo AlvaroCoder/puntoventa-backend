@@ -38,11 +38,7 @@ const ProductoVarianteEstandar = sequelize.define('producto_variantes_estandar',
     timestamps: false,
     indexes: [
     {
-        unique: true,
-        fields: ['producto_estandar_id', 'talla', 'color'] 
-    },
-    {
-        fields: ['producto_estandar_id']
+        fields: ['producto_estandar_id'] 
     }
     ]
 });

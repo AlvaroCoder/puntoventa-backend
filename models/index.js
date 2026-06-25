@@ -57,4 +57,20 @@ models.Rol.hasMany(models.Trabajador, { foreignKey: 'rol_id', as: 'trabajadores'
 models.SuscripcionEmpresa.belongsTo(models.PlanSuscripcion, { foreignKey: 'plan_id', as: 'plan' });
 models.PlanSuscripcion.hasMany(models.SuscripcionEmpresa, { foreignKey: 'plan_id', as: 'suscripciones' });
 
+models.ProductoEstandar.belongsTo(models.CategoriaEstandar, {
+  foreignKey: 'categoria_id',
+  as: 'categoria'
+});
+
+models.ProductoEstandar.belongsTo(models.MarcaEstandar, {
+  foreignKey: 'marca_id',
+  as: 'marca'
+});
+
+models.ProductoEstandar.belongsTo(models.PresentacionEstandar, {
+  foreignKey: 'presentacion_id',
+  as: 'presentacion'
+});
+
+
 module.exports = models;

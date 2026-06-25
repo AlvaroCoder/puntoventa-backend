@@ -1,25 +1,36 @@
 const { Op } = require('sequelize');
 const ResponseHandler = require('../../lib/responseHanlder');
-const { ProductoEstandar, CategoriaEstandar, MarcaEstandar,
-        PresentacionEstandar, ProductoVarianteEstandar } = require('../../models/index');
+const { ProductoEstandar, CategoriaEstandar, MarcaEstandar,PresentacionEstandar, ProductoVarianteEstandar } = require('../../models/index');
 
 exports.getAllProductosEstandar = async (req, res) => {
-    try {
-        const productos = await ProductoEstandar.findAll({
-            where: { activo: 1 }, 
-            include: [
-                { model: CategoriaEstandar,  as: 'categoria',   attributes: ['id', 'nombre', 'codigo'] },
-                { model: MarcaEstandar,       as: 'marca',        attributes: ['id', 'nombre'] },
-                { model: PresentacionEstandar,as: 'presentacion', attributes: ['id', 'nombre', 'abreviatura'] }
+    try {        
+        const productos = await ProductoEstandar.findAll({  
+            where: { activo: 1 },
+                include: [                           
+                {
+                    model: CategoriaEstandar,
+                    as: 'categoria',
+                    attributes: ['id', 'nombre']
+                },
+                {
+                    model: MarcaEstandar,
+                    as: 'marca',
+                    attributes: ['id', 'nombre']
+                },
+                {
+                    model: PresentacionEstandar,
+                    as: 'presentacion',
+                    attributes: ['id', 'nombre', 'abreviatura']
+                }
             ],
             order: [['nombre', 'ASC']]
         });
-
+        
         ResponseHandler.sendSuccess(res, "Productos encontrados", {
             data: productos,
             count: productos.length
         });
-    } catch (err) {
+    } catch (err) {        
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };
@@ -30,10 +41,9 @@ exports.getProductoEstandarById = async (req, res) => {
 
         const producto = await ProductoEstandar.findByPk(id, {  
             include: [
-                { model: CategoriaEstandar,       as: 'categoria',   attributes: ['id', 'nombre'] },
-                { model: MarcaEstandar,            as: 'marca',        attributes: ['id', 'nombre'] },
-                { model: PresentacionEstandar,     as: 'presentacion', attributes: ['id', 'nombre', 'abreviatura'] },
-                { model: ProductoVarianteEstandar, as: 'variantes',    where: { activo: 1 }, required: false }
+                { model: CategoriaEstandar, as: 'categoria', attributes: ['id', 'nombre'] },
+                { model: MarcaEstandar, as: 'marca', attributes: ['id', 'nombre'] },
+                { model: PresentacionEstandar, as: 'presentacion', attributes: ['id', 'nombre', 'abreviatura'] },
             ]
         });
 
@@ -57,10 +67,9 @@ exports.getProductosByRubro = async (req, res) => {
                 activo: 1
             },
             include: [
-                { model: CategoriaEstandar,       as: 'categoria',  attributes: ['id', 'nombre', 'categoria_padre_id'] },
-                { model: MarcaEstandar,            as: 'marca',       attributes: ['id', 'nombre'] },
-                { model: PresentacionEstandar,     as: 'presentacion',attributes: ['id', 'nombre', 'abreviatura'] },
-                { model: ProductoVarianteEstandar, as: 'variantes',   where: { activo: 1 }, required: false }
+                { model: CategoriaEstandar, as: 'categoria',  attributes: ['id', 'nombre', 'categoria_padre_id'] },
+                { model: MarcaEstandar, as: 'marca', attributes: ['id', 'nombre'] },
+                { model: PresentacionEstandar, as: 'presentacion',attributes: ['id', 'nombre', 'abreviatura'] },
             ],
             order: [
                 [{ model: CategoriaEstandar, as: 'categoria' }, 'nombre', 'ASC'],
