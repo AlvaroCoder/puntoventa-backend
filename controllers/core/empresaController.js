@@ -13,14 +13,13 @@ exports.getAllEmpresas = async (req, res) => {
 exports.getEmpresaById = async (req, res) => {
     try {
         const empresa = await EmpresaModelo.findByPk(req.params.id);
-        if (!empresa) return ResponseHandler.sendNotFound(res, "Empresa no encontrada"); // FIX BUG-06
+        if (!empresa) return ResponseHandler.sendNotFound(res, "Empresa no encontrada");
         ResponseHandler.sendSuccess(res, "Empresa encontrada", empresa);
     } catch (err) {
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };
 
-// Obtiene la empresa del usuario autenticado (dueño)
 exports.getMiEmpresa = async (req, res) => {
     try {
         const empresa = await EmpresaModelo.findOne({ where: { usuario_id: req.user.id } });
@@ -35,7 +34,7 @@ exports.createEmpresa = async (req, res) => {
     try {
         const empresa = await EmpresaModelo.create(req.body);
         ResponseHandler.sendSuccess(res, "Empresa creada correctamente", empresa);
-    } catch (err) {
+    } catch (err) {        
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };
@@ -43,7 +42,7 @@ exports.createEmpresa = async (req, res) => {
 exports.updateEmpresa = async (req, res) => {
     try {
         const empresa = await EmpresaModelo.findByPk(req.params.id);
-        if (!empresa) return ResponseHandler.sendNotFound(res, "No existe esa empresa"); // FIX BUG-06
+        if (!empresa) return ResponseHandler.sendNotFound(res, "No existe esa empresa");
         await empresa.update(req.body);
         ResponseHandler.sendSuccess(res, "Empresa actualizada correctamente", empresa);
     } catch (err) {
@@ -54,10 +53,25 @@ exports.updateEmpresa = async (req, res) => {
 exports.deleteEmpresa = async (req, res) => {
     try {
         const empresa = await EmpresaModelo.findByPk(req.params.id);
-        if (!empresa) return ResponseHandler.sendNotFound(res, "No existe esa empresa"); // FIX BUG-06
+        if (!empresa) return ResponseHandler.sendNotFound(res, "No existe esa empresa"); 
         await empresa.destroy();
-        ResponseHandler.sendSuccess(res, "Se eliminó correctamente"); // FIX BUG-06: res como primer arg
+        ResponseHandler.sendSuccess(res, "Se eliminó correctamente");
     } catch (err) {
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };
+
+exports.validateRucEmpresa = async (req, res) => {
+    try {
+        const { ruc } = req.params;
+        const empresa = await EmpresaModelo.findOne({
+            where: {
+                ruc
+            }
+        });
+
+        ResponseHandler.sendSuccess(res, "Empresa encontrada",empresa )
+    } catch (err) {
+        ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
+    }
+}

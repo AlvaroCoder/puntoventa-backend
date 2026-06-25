@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const ProductEstandarController = require('../../controllers/estandar/productosEstandar');
+const authMiddleware = require('../../middlewares/authMiddleware');
+
+router.use(authMiddleware)
 
 router.get('/', ProductEstandarController.getAllProductosEstandar);
 router.get('/:id', ProductEstandarController.getProductoEstandarById);

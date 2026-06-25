@@ -13,4 +13,5 @@ router.post('/', empresaController.createEmpresa);
 router.put('/:id', empresaController.updateEmpresa);
 router.delete('/:id', empresaController.deleteEmpresa);
 
+router.get('/validar_ruc/:ruc', empresaController.validateRucEmpresa);
 module.exports = router;
