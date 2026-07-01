@@ -384,16 +384,16 @@ exports.login = async (req, res) => {
 
         await usuario.update({ ultimo_login: new Date() });
 
-        // Detectar si es dueño o trabajador
         let token;
         let tipoUsuario;
         let datosExtra = {};
 
         const empresa = await EmpresaModelo.findOne({ where: { usuario_id: usuario.id } });
-
+        console.log('Empresa : ', empresa);
+        
         if (empresa) {
             token = generarTokenDueno(usuario, empresa.id);
-            tipoUsuario = 'dueno';
+            tipoUsuario = 'dueño';
             datosExtra = { empresa_id: empresa.id };
         } else {
             const trabajador = await TrabajadorModelo.findOne({ where: { usuario_id: usuario.id, activo: true } });

@@ -17,5 +17,6 @@ router.use('/cliente', require('./ventas/clienteRoutes'));
 router.use('/venta-detalles', require('./ventas/ventaDetallesRoutes'));
 router.use('/rubro', require('./core/rubroRoute'));
 router.use('/estandar', require('./estandar/productosEstandar'));
+router.use('/caja', require('./core/cajaRoutes'));
 
 module.exports = router;
