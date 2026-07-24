@@ -10,7 +10,6 @@ exports.getCreditoClienteByVentaId = async (req, res) => {
             order: [['fecha_credito', 'DESC']],
         });
 
-        // CORRECCIÓN: Estructura consistente de respuesta
         ResponseHandler.sendSuccess(res, "Créditos encontrados", {
             data: creditos,
             count: creditos.length

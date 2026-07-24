@@ -43,26 +43,6 @@ const CajaTienda = sequelize.define("caja_tienda",{
             }
         }
     },
-    saldo_inicial: {
-        type: DataTypes.DECIMAL(10, 2),
-        defaultValue: 0,
-        validate: {
-            min: {
-                args: [0],
-                msg: "El saldo inicial no puede ser negativo"
-            }
-        }
-    },
-    saldo_actual: {
-        type: DataTypes.DECIMAL(10, 2),
-        defaultValue: 0,
-        validate: {
-            min: {
-                args: [0],
-                msg: "El saldo actual no puede ser negativo"
-            }
-        }
-    },
     moneda: {
         type: DataTypes.STRING(10),
         defaultValue: 'PEN',

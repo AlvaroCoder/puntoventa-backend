@@ -21,17 +21,18 @@ exports.getAllCajas = async (req, res) => {
         if (activa !== undefined) {
             whereClause.activa = activa === 'true';
         }
-
+        
         const cajas = await CajaTienda.findAll({
             where: whereClause,
             order: [['nombre', 'ASC']]
-        });
+        });        
 
         ResponseHandler.sendSuccess(res, "Cajas obtenidas exitosamente", {
             data: cajas,
             count: cajas.length
         });
     } catch (err) {
+        console.log('Error al obtener cajas: ', err);
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };
@@ -52,7 +53,7 @@ exports.getCajaById = async (req, res) => {
 
 exports.createCaja = async (req, res) => {
     try {
-        const { tienda_id, nombre, codigo, saldo_inicial, moneda } = req.body;
+        const { tienda_id, nombre, codigo, moneda } = req.body;
 
         if (!tienda_id || !nombre || !codigo) {
             return ResponseHandler.sendValidationError(res, "tienda_id, nombre y codigo son requeridos");
@@ -67,8 +68,6 @@ exports.createCaja = async (req, res) => {
             tienda_id,
             nombre,
             codigo,
-            saldo_inicial: saldo_inicial || 0,
-            saldo_actual: saldo_inicial || 0,
             moneda: moneda || 'PEN'
         });
 
@@ -247,11 +246,8 @@ exports.getSesionActual = async (req, res) => {
             where: { caja_id: req.params.id, estado: 'abierta' }
         });
 
-        if (!sesion) {
-            return ResponseHandler.sendNotFound(res, "No hay sesión activa para esta caja");
-        }
-
-        ResponseHandler.sendSuccess(res, "Sesión activa obtenida", sesion);
+        ResponseHandler.sendSuccess(res, "Sesión activa obtenida", sesion || []);
+        
     } catch (err) {
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }

@@ -4,7 +4,6 @@ const authMiddleware = require('../../middlewares/authMiddleware');
 
 router.use(authMiddleware);
 
-// Revisar que la base de datos es una base de datos estandar la cual recopila informacion basica de productos comunes en tiendas.
 
 router.get("/empresa/:id", ProductoController.getAllProductsByIdEmpresa);
 router.get("/categoria", ProductoController.getAllProductsByCategoria);

@@ -10,6 +10,8 @@ router.get('/:id', ProductEstandarController.getProductoEstandarById);
 router.get('/rubro/:rubroId', ProductEstandarController.getProductosByRubro);
 router.get('/categoria/:categoriaId', ProductEstandarController.getProductosByCategoria);
 
+router.post('/importar-empresa', ProductEstandarController.importarAEmpresa);
+
 router.post('/', ProductEstandarController.createProductoEstandar);
 router.put('/:id', ProductEstandarController.updateProductoEstandar);
 router.put('/deactivate/:id', ProductEstandarController.deactivateProductoEstandar);

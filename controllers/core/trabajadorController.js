@@ -63,7 +63,6 @@ exports.createTrabajador = async (req, res) => {
             );
         }
 
-        // Validar cuota del plan
         const suscripcion = await SuscripcionEmpresa.findOne({
             where: { empresa_id, estado: 'activa' },
             include: [{ model: PlanSuscripcion, as: 'plan', attributes: ['limite_empleados', 'nombre'] }]
@@ -79,14 +78,12 @@ exports.createTrabajador = async (req, res) => {
             );
         }
 
-        // Verificar email no duplicado
         const usuarioExistente = await UsuarioModelo.findOne({ where: { email: email.toLowerCase() } });
         if (usuarioExistente) {
             await t.rollback();
             return ResponseHandler.sendValidationError(res, "Ya existe un usuario con ese email.");
         }
 
-        // Crear usuario (cuenta de acceso) dentro de la transacción
         const passwordHash = await bcrypt.hash(password, 10);
         const nuevoUsuario = await UsuarioModelo.create({
             email: email.toLowerCase(),
@@ -98,7 +95,6 @@ exports.createTrabajador = async (req, res) => {
             fecha_registro: new Date()
         }, { transaction: t });
 
-        // Crear trabajador dentro de la transacción
         const nuevoTrabajador = await TrabajadorModel.create({
             empresa_id,
             usuario_id: nuevoUsuario.id,

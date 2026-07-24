@@ -1,7 +1,7 @@
 const sequelize = require('../../config/db');
 const {DataTypes} = require("sequelize")
 
-const Producto = sequelize.define("Producto",{
+const Producto = sequelize.define("productos",{
   id : {
     type : DataTypes.INTEGER,
     primaryKey : true,
@@ -133,27 +133,7 @@ const Producto = sequelize.define("Producto",{
   tags_moda: {
     type: DataTypes.JSON,
     allowNull: true,
-  },
-  stock_actual : {
-    type : DataTypes.INTEGER,
-    defaultValue : 0,
-    validate :{
-      min : {
-        args : [0],
-        msg : "El stock no puede ser negativo"
-      }
-    }
-  },
-  stock_minimo : {
-    type : DataTypes.INTEGER,
-    defaultValue : 0,
-    validate :{
-      min : {
-        args : [0],
-        msg : "El stock no puede ser negativo"
-      }
-    }
-  },
+  }
 
 },{
   tableName : "productos",
