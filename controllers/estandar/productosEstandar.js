@@ -184,19 +184,6 @@ exports.deactivateProductoEstandar = async (req, res) => {
     }
 };
 
-/**
- * POST /api/estandar/importar-empresa
- * Copia productos del catálogo estándar a la tabla productos de la empresa autenticada.
- *
- * Body:
- *   producto_ids  {number[]}  IDs de productos_estandar a importar (requerido)
- *   categoria_id  {number}    Categoría propia de la empresa a asignar (requerido)
- *   precio_venta  {number}    Precio de venta por defecto para todos (requerido)
- *   precio_compra {number}    Precio de compra por defecto (opcional)
- *   aplica_igv    {boolean}   Si aplica IGV (opcional, default false)
- *   tienda_id     {number}    Si se envía, crea registro en inventario_tienda con stock 0 (opcional)
- *   overrides     {Array}     Precio por producto individual: [{ producto_estandar_id, precio_venta, precio_compra }]
- */
 exports.importarAEmpresa = async (req, res) => {
     try {
         const { producto_ids, categoria_id, precio_venta, precio_compra, aplica_igv, tienda_id, overrides } = req.body;
