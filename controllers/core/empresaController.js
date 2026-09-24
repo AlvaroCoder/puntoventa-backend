@@ -1,4 +1,7 @@
-const EmpresaModelo = require('../../models/core/empresa');
+const models = require('../../models');
+const EmpresaModelo = models.Empresa;
+const SuscripcionModelo = models.SuscripcionEmpresa;
+
 const ResponseHandler = require('../../lib/responseHanlder');
 
 exports.getAllEmpresas = async (req, res) => {

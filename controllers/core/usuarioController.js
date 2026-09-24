@@ -325,10 +325,6 @@ exports.verificarEmail=async(req, res)=>{
         
         const usuarioExistente = await UsuarioModelo.findOne({ where: whereClause });
 
-        if (!usuarioExistente) {
-            return ResponseHandler.sendNotFound(res, "No existe el usuario");
-        }
-
         ResponseHandler.sendSuccess(res, "Verificación de email completada", {
             disponible: !usuarioExistente,
             email: email.toLowerCase()
@@ -389,12 +385,11 @@ exports.login = async (req, res) => {
         let datosExtra = {};
 
         const empresa = await EmpresaModelo.findOne({ where: { usuario_id: usuario.id } });
-        console.log('Empresa : ', empresa);
         
         if (empresa) {
             token = generarTokenDueno(usuario, empresa.id);
             tipoUsuario = 'dueño';
-            datosExtra = { empresa_id: empresa.id };
+            datosExtra = { empresa_id: empresa.id, rubro_id : empresa?.rubro_id };
         } else {
             const trabajador = await TrabajadorModelo.findOne({ where: { usuario_id: usuario.id, activo: true } });
 
@@ -604,10 +599,10 @@ exports.resetPassword=async(req, res)=>{
 
 exports.registro=async(req, res)=>{
     try {
-        const { email, password, nombre_completo, ruc_dni, telefono } = req.body;
+        const { email, password } = req.body;
 
-        if (!email || !password || !nombre_completo || !ruc_dni) {
-            return ResponseHandler.sendValidationError(res, "Email, contraseña, nombre completo y RUC/DNI son requeridos");
+        if (!email || !password ) {
+            return ResponseHandler.sendValidationError(res, "Email, contraseña son requeridos");
         }
 
         const usuarioExistente = await UsuarioModelo.findOne({
@@ -618,23 +613,12 @@ exports.registro=async(req, res)=>{
             return ResponseHandler.sendForbidden(res, "Usuario ya existente");
         }
 
-        const documentoExistente = await UsuarioModelo.findOne({
-            where: { ruc_dni: ruc_dni }
-        });
-
-        if (documentoExistente) {
-            return ResponseHandler.sendForbidden(res, "El RUC/DNI ya está registrado");
-        }
-
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash(password, saltRounds);
 
         const usuario = await UsuarioModelo.create({
             email: email.toLowerCase(),
             password_hash: passwordHash,
-            nombre_completo: nombre_completo.trim().toUpperCase(),
-            ruc_dni: ruc_dni,
-            telefono: telefono,
             activo: true,
             fecha_registro: new Date()
         });
@@ -644,9 +628,6 @@ exports.registro=async(req, res)=>{
         const usuarioResponse = {
             id: usuario.id,
             email: usuario.email,
-            nombre_completo: usuario.nombre_completo,
-            ruc_dni: usuario.ruc_dni,
-            telefono: usuario.telefono,
             fecha_registro: usuario.fecha_registro,
             activo: usuario.activo,
             ultimo_login: usuario.ultimo_login

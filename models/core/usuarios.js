@@ -28,7 +28,7 @@ const Usuarios = sequelize.define("usuarios",{
     },
     nombre_completo : {
         type : DataTypes.STRING(255),
-        allowNull : false,
+        allowNull : true,
         validate : {
             len: {
                 args : [0,255],

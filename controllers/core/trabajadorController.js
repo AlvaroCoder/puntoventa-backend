@@ -9,6 +9,7 @@ const UsuarioModelo = models.Usuario;
 const RolModelo = models.Rol;
 const SuscripcionEmpresa = models.SuscripcionEmpresa;
 const PlanSuscripcion = models.PlanSuscripcion;
+const TrabajadorRolModel = models.TrabajadorRoles;
 
 const includeRol = [
     { model: RolModelo, as: 'rol', attributes: ['id', 'nombre', 'nivel_permiso'] }
@@ -51,25 +52,25 @@ exports.createTrabajador = async (req, res) => {
     const t = await sequelize.transaction();
     try {
         const {
-            password, email, empresa_id, tienda_id, rol_id,
-            nombre_completo, tipo_documento, numero_documento,
-            telefono, codigo_empleado, fecha_contratacion, salario_base
+            usuario_id, email, empresa_id,nombre_completo, tipo_documento, numero_documento,
+            telefono, codigo_empleado, fecha_contratacion, salario_base, rol_id
         } = req.body;
 
-        if (!password || !email || !empresa_id || !tienda_id || !rol_id || !nombre_completo || !numero_documento) {
+        if (!empresa_id || !nombre_completo || !numero_documento) {
             await t.rollback();
             return ResponseHandler.sendValidationError(res,
-                "Faltan campos obligatorios: password, email, empresa_id, tienda_id, rol_id, nombre_completo, numero_documento"
+                "Faltan campos obligatorios: password, email, empresa_id, tienda_id, nombre_completo, numero_documento"
             );
         }
 
         const suscripcion = await SuscripcionEmpresa.findOne({
             where: { empresa_id, estado: 'activa' },
-            include: [{ model: PlanSuscripcion, as: 'plan', attributes: ['limite_empleados', 'nombre'] }]
+            include: [{ model: PlanSuscripcion, as: 'plan', attributes: ['limite_empleados', 'nombre'] }],
+            transaction : t
         });
 
-        const limiteEmpleados = suscripcion?.plan?.limite_empleados ?? 1;
-        const totalActuales = await TrabajadorModel.count({ where: { empresa_id, activo: true } });
+        const limiteEmpleados = suscripcion?.plan?.limite_empleados ?? 2;
+        const totalActuales = await TrabajadorModel.count({ where: { empresa_id, activo: true }, transaction : t });
 
         if (totalActuales >= limiteEmpleados) {
             await t.rollback();
@@ -78,28 +79,23 @@ exports.createTrabajador = async (req, res) => {
             );
         }
 
-        const usuarioExistente = await UsuarioModelo.findOne({ where: { email: email.toLowerCase() } });
-        if (usuarioExistente) {
-            await t.rollback();
-            return ResponseHandler.sendValidationError(res, "Ya existe un usuario con ese email.");
-        }
-
-        const passwordHash = await bcrypt.hash(password, 10);
-        const nuevoUsuario = await UsuarioModelo.create({
-            email: email.toLowerCase(),
-            password_hash: passwordHash,
-            nombre_completo: nombre_completo.trim().toUpperCase(),
-            ruc_dni: numero_documento,
-            telefono: telefono ?? null,
-            activo: true,
-            fecha_registro: new Date()
-        }, { transaction: t });
+            if (email) {
+            const usuarioExistente = await UsuarioModelo.findOne({
+                where: { email: email.toLowerCase() },
+                transaction: t,
+            });
+            if (usuarioExistente) {
+                await t.rollback();
+                return ResponseHandler.sendValidationError(
+                res,
+                "Ya existe un usuario con ese email.",
+                );
+            }
+}
 
         const nuevoTrabajador = await TrabajadorModel.create({
             empresa_id,
-            usuario_id: nuevoUsuario.id,
-            tienda_id,
-            rol_id,
+            usuario_id,
             nombre_completo: nombre_completo.trim().toUpperCase(),
             tipo_documento: tipo_documento ?? 'DNI',
             numero_documento,
@@ -107,19 +103,26 @@ exports.createTrabajador = async (req, res) => {
             telefono: telefono ?? null,
             codigo_empleado: codigo_empleado || `EMP-${Date.now()}`,
             fecha_contratacion: fecha_contratacion ?? new Date(),
-            salario_base: salario_base ?? 1025.0,
+            salario_base: salario_base ?? 1150.0,
             activo: true
         }, { transaction: t });
 
-        await t.commit();
+        await TrabajadorRolModel.create(
+          {
+            trabajador_id: nuevoTrabajador.id,
+            rol_id,
+            tienda_id: tienda_id ?? null,
+            activo: true,
+          },
+          { transaction: t },
+        );
 
-        const trabajadorConRol = await TrabajadorModel.findByPk(nuevoTrabajador.id, { include: includeRol });
-        const usuarioResponse = { ...nuevoUsuario.toJSON() };
-        delete usuarioResponse.password_hash;
+        const trabajadorConRol = await TrabajadorModel.findByPk(nuevoTrabajador.id, { include: includeRol, transaction: t });
+        
+        await t.commit();
 
         ResponseHandler.sendSuccess(res, "Trabajador creado exitosamente", {
             trabajador: trabajadorConRol,
-            usuario: usuarioResponse,
             cuota: { total: totalActuales + 1, limite: limiteEmpleados, disponibles: limiteEmpleados - (totalActuales + 1) }
         }, 201);
 
@@ -167,6 +170,18 @@ exports.toggleEstadoTrabajador = async (req, res) => {
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };
+
+exports.getTrabajadorRol = async (req, res) => {
+    try {
+        const { trabajador_id } = req.query;
+        const trabajadorRol = await TrabajadorRolModel.findAll({
+            where: { trabajador_id }
+        });
+        ResponseHandler.sendSuccess(res, "Trabajador encontrado", trabajadorRol);
+    } catch (err) {
+        ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err))
+    }
+}
 
 exports.getTrabajadorByEmpresa = async (req, res) => {
     try {

@@ -15,6 +15,14 @@ const CategoriaProducto = sequelize.define("categorias_productos",{
       key : "id"
     }
   },
+  categoria_padre_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'categorias_productos',
+      key: 'id'
+    }
+  },
   nombre : {
     type : DataTypes.STRING(255),
     allowNull : false,
