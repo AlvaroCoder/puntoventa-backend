@@ -36,10 +36,14 @@ exports.getTiendaById = async (req, res) => {
 };
 
 exports.createTienda = async (req, res) => {
-    try {
+  try {
+      console.log("Tienda enviada : ",req.body);
+      
       const tienda = await TiendaModel.create(req.body);
-      ResponseHandler.sendCreated(res, "Tienda creada exitosamente", tienda);
-    } catch (err) {
+      ResponseHandler.sendSuccess(res, "Tienda creada exitosamente", tienda);
+  } catch (err) {
+    console.log(err);
+    
       ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };

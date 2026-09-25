@@ -13,7 +13,7 @@ router.get('/tienda/:tiendaId', trabajadoresController.getTrabajadoresByIdTienda
 router.get('/verificar-documento/:documento', trabajadoresController.verificarDocumentoTrabajador);
 router.get('/:id', trabajadoresController.getTrabajadorById);
 
-router.post('/', roleMiddleware(4), trabajadoresController.createTrabajador);
+router.post('/',  trabajadoresController.createTrabajador);
 router.put('/:id', roleMiddleware(4), trabajadoresController.updateTrabajador);
 router.patch('/:id/estado', roleMiddleware(4), trabajadoresController.toggleEstadoTrabajador);
 router.patch('/:id/salario', roleMiddleware(4), trabajadoresController.actualizarSalarioTrabajador);

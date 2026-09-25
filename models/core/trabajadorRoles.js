@@ -1,62 +1,66 @@
 const sequelize = require('../../config/db');
 const { DataTypes } = require("sequelize");
 
-const TrabajadorRoles = sequelize.define('trabajador_roles', {
+const TrabajadorRoles = sequelize.define(
+  "trabajador_roles",
+  {
     id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
     },
     trabajador_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'trabajadores',
-            key: 'id'
-        }
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "trabajadores",
+        key: "id",
+      },
     },
     rol_id: {
-        type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'roles',
-            key: 'id'
-        }
+            model: "roles",
+            key :'id'
+      }
     },
     tienda_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'tienda',
-            key: 'id'
-        }
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "tienda",
+        key: "id",
+      },
     },
     fecha_asignacion: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     activo: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
-    }
-}, {
-    tableName: 'trabajador_roles',
-    timestamps: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+  },
+  {
+    tableName: "trabajador_roles",
+    timestamps: false,
     indexes: [
-        {
-            fields: ['id']
-        },
-        {
-            fields: ['trabajador_id']
-        },
-        {
-            fields: ['rol_id']
-        },
-        {
-            fields: ['tienda_id']
-        }
-    ]
-});
+      {
+        fields: ["id"],
+      },
+      {
+        fields: ["trabajador_id"],
+      },
+      {
+        fields: ["rol_id"],
+      },
+      {
+        fields: ["tienda_id"],
+      },
+    ],
+  },
+);
 
 module.exports = TrabajadorRoles;

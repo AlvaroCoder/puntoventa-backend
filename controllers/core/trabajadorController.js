@@ -53,10 +53,10 @@ exports.createTrabajador = async (req, res) => {
     try {
         const {
             usuario_id, email, empresa_id,nombre_completo, tipo_documento, numero_documento,
-            telefono, codigo_empleado, fecha_contratacion, salario_base, rol_id
+            telefono, codigo_empleado, fecha_contratacion, salario_base, rol_id, tienda_id
         } = req.body;
 
-        if (!empresa_id || !nombre_completo || !numero_documento) {
+        if (!empresa_id ) {
             await t.rollback();
             return ResponseHandler.sendValidationError(res,
                 "Faltan campos obligatorios: password, email, empresa_id, tienda_id, nombre_completo, numero_documento"
@@ -78,20 +78,6 @@ exports.createTrabajador = async (req, res) => {
                 `Has alcanzado el límite de ${limiteEmpleados} empleado(s) para tu plan "${suscripcion?.plan?.nombre ?? 'actual'}". Actualiza tu plan para agregar más trabajadores.`
             );
         }
-
-            if (email) {
-            const usuarioExistente = await UsuarioModelo.findOne({
-                where: { email: email.toLowerCase() },
-                transaction: t,
-            });
-            if (usuarioExistente) {
-                await t.rollback();
-                return ResponseHandler.sendValidationError(
-                res,
-                "Ya existe un usuario con ese email.",
-                );
-            }
-}
 
         const nuevoTrabajador = await TrabajadorModel.create({
             empresa_id,
@@ -117,7 +103,7 @@ exports.createTrabajador = async (req, res) => {
           { transaction: t },
         );
 
-        const trabajadorConRol = await TrabajadorModel.findByPk(nuevoTrabajador.id, { include: includeRol, transaction: t });
+        const trabajadorConRol = await TrabajadorModel.findByPk(nuevoTrabajador.id, { transaction: t });
         
         await t.commit();
 
@@ -127,6 +113,7 @@ exports.createTrabajador = async (req, res) => {
         }, 201);
 
     } catch (err) {
+        console.log("Error : ",err)
         await t.rollback();
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }

@@ -18,11 +18,6 @@ const Trabajador = sequelize.define("trabajadores", {
         allowNull: false,
         references: { model: 'usuarios', key: 'id' }
     },
-    tienda_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: { model: 'tiendas', key: 'id' }
-    },
     codigo_empleado: {
         type: DataTypes.STRING(50),
         allowNull: false,
@@ -33,10 +28,7 @@ const Trabajador = sequelize.define("trabajadores", {
     },
     nombre_completo: {
         type: DataTypes.STRING(255),
-        allowNull: true,
-        validate: {
-            notEmpty: { msg: "Debes ingresar el nombre completo del trabajador" }
-        }
+        allowNull: true
     },
     tipo_documento: {
         type: DataTypes.STRING(10),
