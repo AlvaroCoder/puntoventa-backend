@@ -48,6 +48,26 @@ exports.getTrabajadorById = async (req, res) => {
     }
 };
 
+exports.getTrabajadorByIdUsuario = async (req, res) => {
+    try {
+        const trabajador = await TrabajadorModel.findOne({
+          where: { usuario_id: req.params.userId },
+        });
+         if (!trabajador)return ResponseHandler.sendNotFound(res, "Trabajador no encontrado");
+         ResponseHandler.sendSuccess(
+           res,
+           "Trabajador obtenido exitosamente",
+           trabajador,
+         );
+    } catch (err) {
+                ResponseHandler.send(
+                  res,
+                  ResponseHandler.handlerSequelizeError(err),
+                );
+
+    }
+}
+
 exports.createTrabajador = async (req, res) => {
     const t = await sequelize.transaction();
     try {

@@ -6,6 +6,7 @@ const roleMiddleware = require('../../middlewares/roleMiddleware');
 router.use(authMiddleware);
 
 router.get('/', trabajadoresController.getAllTrabajadores);
+router.get('/usuario/:userId', trabajadoresController.getTrabajadorByIdUsuario)
 router.get('/buscar/:termino', trabajadoresController.searchTrabajadores);
 router.get('/empresa/:empresaId', trabajadoresController.getTrabajadorByEmpresa);
 router.get('/empresa/:empresaId/cuota', trabajadoresController.getCuotaTrabajadores);
