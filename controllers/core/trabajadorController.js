@@ -25,7 +25,6 @@ exports.getAllTrabajadores = async (req, res) => {
 
         const trabajadores = await TrabajadorModel.findAll({
             where: whereClause,
-            include: includeRol,
             order: [['nombre_completo', 'ASC']]
         });
 
@@ -200,7 +199,6 @@ exports.getTrabajadorByEmpresa = async (req, res) => {
 
         const trabajadores = await TrabajadorModel.findAll({
             where: whereClause,
-            include: includeRol,
             order: [['nombre_completo', 'ASC']]
         });
 
@@ -209,6 +207,8 @@ exports.getTrabajadorByEmpresa = async (req, res) => {
             count: trabajadores.length
         });
     } catch (err) {
+        console.log("ERROR : ", err);
+        
         ResponseHandler.send(res, ResponseHandler.handlerSequelizeError(err));
     }
 };

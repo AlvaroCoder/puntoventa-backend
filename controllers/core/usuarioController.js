@@ -386,10 +386,18 @@ exports.login = async (req, res) => {
 
         const empresa = await EmpresaModelo.findOne({ where: { usuario_id: usuario.id } });
         
+        
         if (empresa) {
+            const trabajador = await TrabajadorModelo.findOne({where : {usuario_id : usuario.id }})
+
             token = generarTokenDueno(usuario, empresa.id);
             tipoUsuario = 'dueño';
-            datosExtra = { empresa_id: empresa.id, rubro_id : empresa?.rubro_id };
+            datosExtra = {
+                empresa_id: empresa.id,
+                rubro_id: empresa?.rubro_id,
+                trabajador_id : trabajador?.id
+            };
+
         } else {
             const trabajador = await TrabajadorModelo.findOne({ where: { usuario_id: usuario.id, activo: true } });
 
