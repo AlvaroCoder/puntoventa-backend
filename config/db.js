@@ -1,4 +1,3 @@
-// Utilizamos un ORM para un mejor manejo de la base de datos
 
 const {Sequelize} = require("sequelize")
 require("dotenv").config();

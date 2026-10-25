@@ -13,6 +13,12 @@ router.get(
   ordenCompraController.getOrdenCompraById,
 );
 
+router.get(
+  "/ordenes-compra/empresa/:empresaId",
+  authMiddleware,
+  ordenCompraController.getOrdenesByEmpresa,
+);
+
 router.post(
   "/ordenes-compra",
   authMiddleware,
